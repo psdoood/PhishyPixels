@@ -29,7 +29,7 @@ phish_urls_filename = "data/verified_online.csv"
 phish_index = 1
 
 #Number of urls to extract from each file
-NUM_OF_URLS = 10
+NUM_OF_URLS = 100
 
 #filename of the csv index, and index for the column the url is in.
 def get_urls(filename, index):
@@ -41,23 +41,26 @@ def get_urls(filename, index):
         for i, row in enumerate(csvreader):
             if i >= NUM_OF_URLS:
                 break
-            else:   
-                urls.append(row[index])
-    return urls
-
-#Combines the legit and phish urls into one list 
-def combine_url_lists():
-    urls = get_urls(legit_urls_filename, legit_index) + get_urls(phish_urls_filename, phish_index)
+            else:
+                url = row[index]
+                if not url.startswith(("https://", "http://")):
+                    url = "https://" + url
+                urls.append(url)
     return urls 
 
 #Takes and saves screenshots of each webpage to 'screenshots' and returns them in a list
-def get_screenshots(urls):
+def get_screenshots(urls, folder):
     screenshots = []
     for i, url in enumerate(urls):
-        driver.get(url)
-        save_path = "screenshots/screenshot_" + str(i) + ".png"
-        driver.save_screenshot(save_path)
-        screenshots.append(save_path)
+        try:
+            print(f"Trying to access: {url}")
+            driver.get(url)
+            save_path = f"screenshots/{folder}/" + str(i) + ".png"
+            driver.save_screenshot(save_path)
+            screenshots.append(save_path)
+        except:
+            print(f"Could not access: {url}")
+        
     return screenshots
 
 #Extracts the dominant colors from each screenshot 
@@ -67,7 +70,9 @@ def extract_colors(photos):
 def create_data_structure():
     pass
 
-screenshot = get_screenshots(["https://neetcode.io/"])
 
+urls_list = get_urls(legit_urls_filename, legit_index)
+screenshots_list = get_screenshots(urls_list, "not_phish")
+print(screenshots_list)
 
 driver.quit()
