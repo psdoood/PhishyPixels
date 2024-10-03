@@ -31,8 +31,8 @@ phish_index = 1
 #Number of urls to extract from each file
 NUM_OF_URLS = 20
 #Seconds to try and load page before quiting
-TIME_OUT = 8
-SLEEP = 3
+TIME_OUT = 10
+SLEEP = 5
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -65,6 +65,10 @@ def get_screenshots(urls, folder):
             driver.get(url)
 
             time.sleep(SLEEP)
+
+            if "error" in driver.title.lower() or "404" in driver.title.lower():
+                print(f"Error at this url: {url}")
+                continue
 
             save_path = f"screenshots/{folder}/" + str(i) + ".png"
             driver.save_screenshot(save_path)
