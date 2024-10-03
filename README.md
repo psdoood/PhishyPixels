@@ -14,4 +14,4 @@ Store the csv files in Data folder to run.
 - webdriver-manager (Chrome)
 
 # Warning
-- I would advise using a VPN and a Virtual Machien if you are going to run this
+- I would advise using a VPN and a Virtual Machine if you are going to run this
