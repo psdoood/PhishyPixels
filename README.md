@@ -12,6 +12,7 @@ Store the csv files in Data folder to run.
 - colorgram
 - selenium 
 - webdriver-manager (Chrome)
+- pytesseract
 
 # Warning
 - I would advise using a VPN and a Virtual Machine if you are going to run this

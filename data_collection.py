@@ -1,7 +1,10 @@
 import csv
 #import requests
 import colorgram as cg
-import time
+
+from PIL import Image
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -10,7 +13,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 #Allows selenium to be run in a non GUI environment and downloads a chrome driver
 options = Options()
-options.add_argument("--headless=new")
+options.add_argument("-headless=new")
 options.add_argument("--disable-javascript")
 options.add_argument("--disable-extensions")
 options.add_argument("--no-sandbox")
@@ -18,6 +21,7 @@ options.add_argument("--disable-gpu")
 
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=options)
+
 
 #May need to adjust these filename filepaths based on if you download different from what I did
 #Number, URL 
@@ -32,7 +36,11 @@ phish_index = 1
 NUM_OF_URLS = 20
 #Seconds to try and load page before quiting
 TIME_OUT = 10
-SLEEP = 5
+#How many colors to extract from each image
+NUM_COLORS = 8
+
+#List of some of the more popular targeted websites to focus on
+BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'google', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'meta', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -48,6 +56,7 @@ def get_urls(filename, index):
                 break
             else:
                 url = row[index]
+                #Add scheme if the csv file doesnt include them 
                 if not url.startswith(("https://", "http://")):
                     url = "https://" + url
                 urls.append(url)
@@ -64,8 +73,6 @@ def get_screenshots(urls, folder):
             driver.set_page_load_timeout(TIME_OUT)
             driver.get(url)
 
-            time.sleep(SLEEP)
-
             if "error" in driver.title.lower() or "404" in driver.title.lower():
                 print(f"Error at this url: {url}")
                 continue
@@ -73,6 +80,7 @@ def get_screenshots(urls, folder):
             save_path = f"screenshots/{folder}/" + str(i) + ".png"
             driver.save_screenshot(save_path)
             screenshots.append(save_path)
+            print(f"Screenshot successful: " + str(i) +".png: {url}")
         except:
             print(f"Could not access: {url}")
         
@@ -81,8 +89,16 @@ def get_screenshots(urls, folder):
 #------------------------------------------------------------------------------------------------------#
 
 #Extracts the dominant colors from each screenshot 
-def extract_colors(photos):
+def extract_colors(screenshots):
     pass
+
+#------------------------------------------------------------------------------------------------------#
+
+#Extracts text out of an image (of a website)
+def extract_text(screenshot):
+    image = Image.open(screenshot)
+    text = pytesseract.image_to_string(image)
+    return text
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -91,8 +107,8 @@ def create_data_structure():
 
 #------------------------------------------------------------------------------------------------------#
 
-urls_list = get_urls(legit_urls_filename, legit_index)
-screenshots_list = get_screenshots(urls_list, "not_phish")
-print(screenshots_list)
+#urls_list = get_urls(legit_urls_filename, legit_index)
+#screenshots_list = get_screenshots(urls_list, "not_phish")
+#print(screenshots_list)
 
 driver.quit()
