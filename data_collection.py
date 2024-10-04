@@ -1,3 +1,4 @@
+import os
 import csv
 #import requests
 import colorgram as cg
@@ -33,14 +34,14 @@ phish_urls_filename = "data/verified_online.csv"
 phish_index = 1
 
 #Number of urls to extract from each file
-NUM_OF_URLS = 20
+NUM_OF_URLS = 100
 #Seconds to try and load page before quiting
 TIME_OUT = 10
 #How many colors to extract from each image
-NUM_COLORS = 8
+NUM_COLORS = 5
 
 #List of some of the more popular targeted websites to focus on
-BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'google', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'meta', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
+BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'google', 'tiktok', 'youtube', 'amazon', 'linkedin', 'x', 'paypal', 'meta', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -64,9 +65,27 @@ def get_urls(filename, index):
 
 #------------------------------------------------------------------------------------------------------#
 
+#Extracts text out of an image (of a website)
+def extract_text(screenshot):
+    image = Image.open(screenshot)
+    text = pytesseract.image_to_string(image)
+    return text.lower()
+
+#------------------------------------------------------------------------------------------------------#
+
+#Returns the brand name if it is in BRAND_NAMES, else returns "ignore"
+def determine_brand(screenshot):
+    text = extract_text(screenshot)
+    for name in BRAND_NAMES:
+        if name in text:
+            return name
+    return "ignore"
+
+#------------------------------------------------------------------------------------------------------#
+
 #Takes and saves screenshots of each webpage to 'screenshots' and returns them in a list
 def get_screenshots(urls, folder):
-    screenshots = []
+    screenshots_with_brand = []
     for i, url in enumerate(urls):
         try:
             print(f"Trying to access: {url}")
@@ -79,26 +98,25 @@ def get_screenshots(urls, folder):
 
             save_path = f"screenshots/{folder}/" + str(i) + ".png"
             driver.save_screenshot(save_path)
-            screenshots.append(save_path)
+            
+            brand = determine_brand(save_path)
+            if brand == "ignore":
+                print(f"Unrelated brand, not saving...")
+                os.remove(save_path)
+                continue
+
+            screenshots_with_brand.append([save_path, brand])
             print(f"Screenshot successful: " + str(i) +".png: {url}")
         except:
             print(f"Could not access: {url}")
         
-    return screenshots
+    return screenshots_with_brand
 
 #------------------------------------------------------------------------------------------------------#
 
-#Extracts the dominant colors from each screenshot 
-def extract_colors(screenshots):
-    pass
-
-#------------------------------------------------------------------------------------------------------#
-
-#Extracts text out of an image (of a website)
-def extract_text(screenshot):
-    image = Image.open(screenshot)
-    text = pytesseract.image_to_string(image)
-    return text
+#Extracts the 5 most dominant colors from each screenshot
+def extract_colors(screenshot):
+    colors  = cg.extract(screenshot, NUM_COLORS)
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -107,8 +125,8 @@ def create_data_structure():
 
 #------------------------------------------------------------------------------------------------------#
 
-#urls_list = get_urls(legit_urls_filename, legit_index)
-#screenshots_list = get_screenshots(urls_list, "not_phish")
+urls_list = get_urls(legit_urls_filename, legit_index)
+screenshots_list = get_screenshots(urls_list, "not_phish")
 #print(screenshots_list)
 
 driver.quit()
