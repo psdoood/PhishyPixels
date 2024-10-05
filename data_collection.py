@@ -92,6 +92,7 @@ def get_screenshots(urls, folder):
             driver.set_page_load_timeout(TIME_OUT)
             driver.get(url)
 
+            #Ignores urls with error or 404 in title
             if "error" in driver.title.lower() or "404" in driver.title.lower():
                 print(f"Error at this url: {url}")
                 continue
@@ -99,6 +100,7 @@ def get_screenshots(urls, folder):
             save_path = f"screenshots/{folder}/" + str(i) + ".png"
             driver.save_screenshot(save_path)
             
+            #Removes screenshot if it doesn't contain any brand from BRAND_NAMES
             brand = determine_brand(save_path)
             if brand == "ignore":
                 print(f"Unrelated brand, not saving...")
@@ -116,8 +118,11 @@ def get_screenshots(urls, folder):
 
 #Extracts the 5 most dominant colors from each screenshot
 def extract_colors(screenshot):
+    color_list = []
     colors  = cg.extract(screenshot, NUM_COLORS)
-
+    for color in colors:
+        color_list.append([color.rgb[0], color.rgb[1], color.rgb[2]])
+    return color_list
 #------------------------------------------------------------------------------------------------------#
 
 def create_data_structure():
