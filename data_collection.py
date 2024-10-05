@@ -73,19 +73,27 @@ def extract_text(screenshot):
 
 #------------------------------------------------------------------------------------------------------#
 
-#Returns the brand name if it is in BRAND_NAMES, else returns "ignore"
+#Returns the brand name if it is in BRAND_NAMES, else returns -1
 def determine_brand(screenshot):
     text = extract_text(screenshot)
-    for name in BRAND_NAMES:
+    for i, name in BRAND_NAMES:
         if name in text:
-            return name
-    return "ignore"
+            return i
+    return -1
 
 #------------------------------------------------------------------------------------------------------#
 
 #Takes and saves screenshots of each webpage to 'screenshots' and returns them in a list
-def get_screenshots(urls, folder):
+def get_screenshot_and_brand(urls, is_phish):
     screenshots_with_brand = []
+
+    if is_phish == True:
+        folder = "phish"
+        val = 0
+    else:
+        folder = "not_phish"
+        val = 1
+        
     for i, url in enumerate(urls):
         try:
             print(f"Trying to access: {url}")
@@ -102,13 +110,13 @@ def get_screenshots(urls, folder):
             
             #Removes screenshot if it doesn't contain any brand from BRAND_NAMES
             brand = determine_brand(save_path)
-            if brand == "ignore":
+            if brand == -1:
                 print(f"Unrelated brand, not saving...")
                 os.remove(save_path)
                 continue
 
-            screenshots_with_brand.append([save_path, brand])
-            print(f"Screenshot successful: " + str(i) +".png: {url}")
+            screenshots_with_brand.append([save_path, brand, val])
+            print(f"Screenshot successful: " + str(i) + f".png: {url}")
         except:
             print(f"Could not access: {url}")
         
@@ -121,17 +129,21 @@ def extract_colors(screenshot):
     color_list = []
     colors  = cg.extract(screenshot, NUM_COLORS)
     for color in colors:
-        color_list.append([color.rgb[0], color.rgb[1], color.rgb[2]])
+        color_list.extend([color.rgb[0], color.rgb[1], color.rgb[2]])
     return color_list
-#------------------------------------------------------------------------------------------------------#
-
-def create_data_structure():
-    pass
 
 #------------------------------------------------------------------------------------------------------#
 
-urls_list = get_urls(legit_urls_filename, legit_index)
-screenshots_list = get_screenshots(urls_list, "not_phish")
-#print(screenshots_list)
+#Creates the data strucutres [(15 values <5 * rgb>), (1 value <brand index>), (0 or 1 <0 is phish, 1 is not>)]
+def create_data_structure(screenshots_with_brand):
+    data = []
+    for save_path, brand, val in screenshots_with_brand:
+        colors_and_brand = extract_colors(save_path)
+        colors_and_brand = colors_and_brand + [brand]
+        data.append(colors_and_brand, val) 
+    return data
+
+#------------------------------------------------------------------------------------------------------#
+
 
 driver.quit()
