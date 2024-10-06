@@ -1,6 +1,5 @@
 import os
 import csv
-#import requests
 import colorgram as cg
 
 from PIL import Image
