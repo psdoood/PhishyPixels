@@ -1,4 +1,4 @@
-# Phishy Pixels
+# Phishy Pixels (work in progress)
 
 ## Data
 List of non-legitimate URLS comes from [PhishTank](https://phishtank.org/developer_info.php). 

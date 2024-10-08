@@ -1,6 +1,7 @@
 import os
 import csv
 import colorgram as cg
+import numpy as np
 
 from PIL import Image
 import pytesseract
@@ -138,9 +139,9 @@ def create_data_structure(screenshots_with_brand):
     data = []
     for save_path, brand, val in screenshots_with_brand:
         colors_and_brand = extract_colors(save_path)
-        colors_and_brand = colors_and_brand + [brand]
-        data.append(colors_and_brand, val) 
-    return data
+        features = colors_and_brand + [brand, val]
+        data.append(colors_and_brand) 
+    return np.array(data)
 
 #------------------------------------------------------------------------------------------------------#
 
