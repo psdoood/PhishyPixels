@@ -1,4 +1,5 @@
 import data_collection as dc
+import numpy as np
 
 def main():
     legit_urls = dc.get_urls(dc.legit_urls_filename, dc.legit_index)
