@@ -1,4 +1,5 @@
 import numpy as np 
+import math
 
 class node:
     #data - the feature data array created in data_collection.py
@@ -22,7 +23,7 @@ class decision_tree:
 
     #------------------------------------------------------------------------------------------------------#
 
-    #Starts the process of building the tree, converts data to column stack and calls expand_tree
+    #Starts the process of building the tree, converts data to column stack and calls expand_tree (recursive)
     def start_building(self, features):
         data = np.column_stack(features)
         self.root.data = data
@@ -46,11 +47,36 @@ class decision_tree:
 
     #Returns the feature in the data with the highest information gain, there will be the split
     def best_split(self, data):
+        best_info_gain = -math.inf
+        best_feature_column = None
+        best_split_value = None
+        num_features = 16 #15 RBG values and one brand val
+
+        #Only need to calculate parent entropy once for each split 
+        parent_entropy = self.entropy(data)
+
+        #Determines what feature is going to be best to split on
+        for feature in num_features:
+            feature_column = np.unique(data[:, feature])
+            
+            #TODO: determine split_values based on feature_column (maybe inbetween all the feature_column values)
+            split_values = None 
+
+            for split_value in split_values:
+                info_gain = self.information_gain(data, feature_column, split_value, parent_entropy)
+                if info_gain > best_info_gain:
+                    best_info_gain = info_gain
+                    best_feature_column = feature_column
+                    best_split_value = split_value
+        
+        return best_feature_column, best_split_value
+
 
     #------------------------------------------------------------------------------------------------------#
 
-    #Calculates information gain for each potential split (using entropy)
-    def information_gain(self, data):
+    #Calculates information gain ((entropy of parent node) - (average entropy of child nodes)) for each potential split 
+    def information_gain(self, data, feature_column, split_value, parent_entropy):
+    
 
     #------------------------------------------------------------------------------------------------------#
 
