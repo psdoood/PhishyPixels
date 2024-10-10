@@ -56,31 +56,31 @@ class decision_tree:
         parent_entropy = self.entropy(data)
 
         #Determines what feature is going to be best to split on
-        for feature in num_features:
-            feature_column = np.unique(data[:, feature])
-            
-            #TODO: determine split_values based on feature_column (maybe inbetween all the feature_column values)
-            split_values = None 
+        for feature in range(num_features):
+            feature_vals = np.unique(data[:, feature])
 
-            for split_value in split_values:
-                info_gain = self.information_gain(data, feature_column, split_value, parent_entropy)
+            #might want to change to different feature_vals to iterate through if causing problems
+
+            for split_value in feature_vals:
+                info_gain = self.information_gain(data, feature_vals, split_value, parent_entropy)
                 if info_gain > best_info_gain:
                     best_info_gain = info_gain
-                    best_feature_column = feature_column
+                    best_feature_column = feature_vals
                     best_split_value = split_value
         
         return best_feature_column, best_split_value
 
-
     #------------------------------------------------------------------------------------------------------#
 
     #Calculates information gain ((entropy of parent node) - (average entropy of child nodes)) for each potential split 
+    #<https://en.wikipedia.org/wiki/Information_gain_(decision_tree)>
     def information_gain(self, data, feature_column, split_value, parent_entropy):
-    
+        
 
     #------------------------------------------------------------------------------------------------------#
 
-    #Calculates the binary entropy using phish_val (either 0 or 1) <https://en.wikipedia.org/wiki/Binary_entropy_function>
+    #Calculates the binary entropy using phish_val (either 0 or 1) 
+    #<https://en.wikipedia.org/wiki/Binary_entropy_function>
     def entropy(self, data):
         phish_vals = data[:, -1]
         p = np.mean(phish_vals)
@@ -93,8 +93,19 @@ class decision_tree:
     
     #------------------------------------------------------------------------------------------------------#
         
-    #Splits the data based on results of best_split 
-    def split_by_feature(self, data):
+    #Splits the data based on the feature and split value 
+    def split_by_feature(self, data, feature_column, split_value):
+        left_data = []
+        right_data = []
+
+        for row in data:
+            if row[feature_column] <= split_value:
+                left_data.append(row)
+            else:
+                right_data.append(row)
+        
+        return np.array(left_data), np.array(right_data)
+
 
     #------------------------------------------------------------------------------------------------------#
 
