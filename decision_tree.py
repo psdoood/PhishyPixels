@@ -111,7 +111,10 @@ class decision_tree:
 
     #Returns true if all data at a node is in the same class (pure)
     def same_classification(self, data):
-    
+        phish_vals = data[:, -1]
+        unique_vals = np.unique(phish_vals)
+        return len(unique_vals) == 1
+
     #------------------------------------------------------------------------------------------------------#
         
     #Uses input to predict classification based on the created tree
