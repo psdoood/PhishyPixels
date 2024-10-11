@@ -18,8 +18,7 @@ class node:
 class decision_tree:
     def __init__(self, max_depth=100):
         self.max_depth = max_depth
-        self.root = node()
-        self.depth = 1
+        self.root = node(depth=0)
 
     #------------------------------------------------------------------------------------------------------#
 
@@ -27,21 +26,29 @@ class decision_tree:
     def start_building(self, features):
         data = np.column_stack(features)
         self.root.data = data
-        self.expand_tree(self.root, self.depth)
+        self.expand_tree(self.root)
 
     #------------------------------------------------------------------------------------------------------#
     
     #Recursively builds the tree, passes in a node and checks if it will exceed max depth or 
     #if it is going to be a leaf node. Also handles splitting
-    def expand_tree(self, current_node, depth=0):
-        if depth >= self.max_depth or self.same_classification(current_node.data)
+    def expand_tree(self, current_node):
+        if current_node.depth >= self.max_depth or self.same_classification(current_node.data)
             current_node.is_leaf = True
-            
-            #TODO:Assign current_node.phish_val here
+            current_node.phish_val = np.round(np.mean(current_node.data[:, -1]))
+            return
          
-        #TODO:Determine best_split and create child nodes
+        #Determine best_split and create child nodes
+        best_feature_column, best_split_value = self.best_split(current_node.data)
 
-        #TODO:Call expand_tree on the new child nodes
+        left_data, right_data = self.split_by_feature(current_node.data, best_feature_column, best_split_value)
+
+        current_node.left_child = node(left_data, depth=current_node.depth+1)
+        current_node.right_child = node(right_data, depth=current_node.depth+1)
+        
+        #Call expand_tree on the new child nodes
+        self.expand_tree(current_node.left_child)
+        self.expand_tree(current_node.right_child)
 
     #------------------------------------------------------------------------------------------------------#
 
@@ -62,7 +69,7 @@ class decision_tree:
             #NOTETOSELF: might want to change to different feature_vals to iterate through if causing problems
 
             for split_value in feature_vals:
-                info_gain = self.information_gain(data, feature_vals, split_value, parent_entropy)
+                info_gain = self.information_gain(data, feature, split_value, parent_entropy)
                 if info_gain > best_info_gain:
                     best_info_gain = info_gain
                     best_feature_column = feature_vals
