@@ -59,7 +59,7 @@ class decision_tree:
         for feature in range(num_features):
             feature_vals = np.unique(data[:, feature])
 
-            #might want to change to different feature_vals to iterate through if causing problems
+            #NOTETOSELF: might want to change to different feature_vals to iterate through if causing problems
 
             for split_value in feature_vals:
                 info_gain = self.information_gain(data, feature_vals, split_value, parent_entropy)
@@ -72,10 +72,20 @@ class decision_tree:
 
     #------------------------------------------------------------------------------------------------------#
 
-    #Calculates information gain ((entropy of parent node) - (average entropy of child nodes)) for each potential split 
+    #Calculates information gain for each potential split 
     #<https://en.wikipedia.org/wiki/Information_gain_(decision_tree)>
     def information_gain(self, data, feature_column, split_value, parent_entropy):
-        
+        left_child, right_child = self.split_by_feature(data, feature_column, split_value)
+
+        if len(left_child) == 0 or len(right_child) == 0:
+            return 0
+
+        left_child_entropy = self.entropy(left_child)
+        right_child_entropy = self.entropy(right_child)
+        average_child_entropy = (left_child_entropy + right_child_entropy) / 2 #NOTETOSELF: May want to switch to weighted average
+
+        return parent_entropy - average_child_entropy
+         
 
     #------------------------------------------------------------------------------------------------------#
 
@@ -109,7 +119,7 @@ class decision_tree:
 
     #------------------------------------------------------------------------------------------------------#
 
-    #Returns true if all data at a node is in the same class (pure)
+    #Returns true if all data at a node is in the same class/phish_val (pure)
     def same_classification(self, data):
         phish_vals = data[:, -1]
         unique_vals = np.unique(phish_vals)
