@@ -6,13 +6,18 @@ class node:
     #left_child/ right_child - binary tree children of current node
     #phish_val - the predicted classification, only useful for the leaf nodes
     #is_leaf - value is true if the node is a leaf node, false otherwise
-    def __init__(self, data=None, left_child=None, right_child=None, phish_val=None, is_leaf=False, depth=None):
+    #depth - keeps track of current node depth in the tree, compares against max_depth
+    #split_val - the value of the feature the children split at, used for prediction
+    #feature - what feature is being used to split the node children, used for prediction
+    def __init__(self, data=None, left_child=None, right_child=None, phish_val=None, is_leaf=False, depth=None, split_val=None, feature=None):
         self.data = data
         self.left_child = left_child
         self.right_child = right_child
         self.phish_val = phish_val
         self.is_leaf = is_leaf
         self.depth = depth
+        self.split_val = split_val
+        self.feature = feature
 
 
 class decision_tree:
@@ -43,6 +48,8 @@ class decision_tree:
 
         left_data, right_data = self.split_by_feature(current_node.data, best_feature_column, best_split_value)
 
+        current_node.split_val = best_split_value
+        current_node.feature = best_feature_column
         current_node.left_child = node(left_data, depth=current_node.depth+1)
         current_node.right_child = node(right_data, depth=current_node.depth+1)
         
@@ -72,7 +79,7 @@ class decision_tree:
                 info_gain = self.information_gain(data, feature, split_value, parent_entropy)
                 if info_gain > best_info_gain:
                     best_info_gain = info_gain
-                    best_feature_column = feature_vals
+                    best_feature_column = feature
                     best_split_value = split_value
         
         return best_feature_column, best_split_value
@@ -135,5 +142,24 @@ class decision_tree:
     #------------------------------------------------------------------------------------------------------#
         
     #Uses input to predict classification based on the created tree
-    def predict():
+    #Returns array of predictions based on data
+    def predict(self, data):
+        predictions = []
+        for features in data:
+            phish_prediction = self.predict_traverse(features, self.root)
+            predictions.append(phish_prediction)
+        return np.array(predictions)
+
+    #------------------------------------------------------------------------------------------------------#
+
+    #Recursive tree traversal function, used for classification of data (phish_val)
+    def predict_traverse(self, features, current_node):
+        if current_node.is_leaf:
+            return current_node.phish_val 
+
+        if features[current_node.feature] <= current_node.split_val:
+            return self.predict_traverse(features, current_node.left_child)
+        else:
+            return self.predict_traverse(features, current_node.right_child)
+
 
