@@ -42,7 +42,7 @@ class decision_tree:
             current_node.is_leaf = True
             current_node.phish_val = np.round(np.mean(current_node.data[:, -1]))
             return
-         
+
         #Determine best_split and create child nodes
         best_feature_column, best_split_value = self.best_split(current_node.data)
 
@@ -99,7 +99,6 @@ class decision_tree:
         average_child_entropy = (left_child_entropy + right_child_entropy) / 2 #NOTETOSELF: May want to switch to weighted average
 
         return parent_entropy - average_child_entropy
-         
 
     #------------------------------------------------------------------------------------------------------#
 
