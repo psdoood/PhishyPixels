@@ -3,6 +3,7 @@ import csv
 import colorgram as cg
 import numpy as np
 
+from threading import Thread, Lock
 from PIL import Image
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -21,8 +22,6 @@ options.add_argument("--no-sandbox")
 options.add_argument("--disable-gpu")
 
 service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service, options=options)
-
 
 #May need to adjust these filename filepaths based on if you download different from what I did
 #Number, URL 
@@ -39,9 +38,11 @@ NUM_OF_URLS = 100
 TIME_OUT = 10
 #How many colors to extract from each image
 NUM_COLORS = 5
+#How many threads can run at a time
+NUM_OF_THREADS = 5
 
 #List of some of the more popular targeted websites to focus on
-BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'google', 'tiktok', 'youtube', 'amazon', 'linkedin', 'x', 'paypal', 'meta', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
+BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'x', 'paypal', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -83,9 +84,45 @@ def determine_brand(screenshot):
 
 #------------------------------------------------------------------------------------------------------#
 
-#Takes and saves screenshots of each webpage to 'screenshots' and returns them in a list
+def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
+    try:
+        print(f"Trying to access: {url}")
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.set_page_load_timeout(TIME_OUT)
+        driver.get(url)
+
+        #Ignores urls with error or 404 in title
+        if "error" in driver.title.lower() or "404" in driver.title.lower():
+            print(f"Error at this url: {url}")
+            return
+
+        save_path = f"screenshots/{folder}/" + str(i) + ".png"
+        driver.save_screenshot(save_path)
+            
+        #Removes screenshot if it doesn't contain any brand from BRAND_NAMES
+        brand = determine_brand(save_path)
+        if brand == -1:
+            print(f"Unrelated brand, not saving...")
+            os.remove(save_path)
+            return 
+        
+        #Lock must be aquired first before continuing
+        with lock:
+            screenshots_with_brand.append([save_path, brand, val])
+        print(f"Screenshot successful: " + str(i) + f".png: {url}")
+        driver.quit()
+    except:
+        print(f"Could not access: {url}")
+        driver.quit()
+
+
+#------------------------------------------------------------------------------------------------------#
+
+#Takes and saves screenshots of each webpage to 'screenshots' and returns them in a list (now uses threading)
 def get_screenshot_and_brand(urls, is_phish):
     screenshots_with_brand = []
+    threads = []
+    lock = Lock()
 
     if is_phish == True:
         folder = "phish"
@@ -93,33 +130,21 @@ def get_screenshot_and_brand(urls, is_phish):
     else:
         folder = "not_phish"
         val = 1
-        
+    
+    #Creates threads for processing each url, depends pn NUM_OF_THREADS
     for i, url in enumerate(urls):
-        try:
-            print(f"Trying to access: {url}")
-            driver.set_page_load_timeout(TIME_OUT)
-            driver.get(url)
+        thread = Thread(target=thread_process_url, args=(url, i, folder, val, screenshots_with_brand, lock))
+        thread.start()
+        threads.append(thread)
+        #If the max threads has been reached, let them all finish then empty the list
+        if len(threads) >= NUM_OF_THREADS:
+            for thread in threads
+                thread.join()
+            threads = []
+    #Execute any remaining threads
+    for thread in threads:
+        thread.join()
 
-            #Ignores urls with error or 404 in title
-            if "error" in driver.title.lower() or "404" in driver.title.lower():
-                print(f"Error at this url: {url}")
-                continue
-
-            save_path = f"screenshots/{folder}/" + str(i) + ".png"
-            driver.save_screenshot(save_path)
-            
-            #Removes screenshot if it doesn't contain any brand from BRAND_NAMES
-            brand = determine_brand(save_path)
-            if brand == -1:
-                print(f"Unrelated brand, not saving...")
-                os.remove(save_path)
-                continue
-
-            screenshots_with_brand.append([save_path, brand, val])
-            print(f"Screenshot successful: " + str(i) + f".png: {url}")
-        except:
-            print(f"Could not access: {url}")
-        
     return screenshots_with_brand
 
 #------------------------------------------------------------------------------------------------------#
@@ -145,5 +170,3 @@ def create_data_structure(screenshots_with_brand):
 
 #------------------------------------------------------------------------------------------------------#
 
-
-driver.quit()
