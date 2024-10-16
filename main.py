@@ -31,7 +31,7 @@ def main():
 
     print("Running test data for predictions...")
     feature_test = test[:, :-1]
-    phish_vals_test = test[:, :-1]
+    phish_vals_test = test[:, -1]
     predictions = tree.predict(feature_test)
 
     print("Calculating accuracy...")

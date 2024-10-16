@@ -14,7 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 #Allows selenium to be run in a non GUI environment and downloads a chrome driver
 options = Options()
-options.add_argument("-headless=new")
+options.add_argument("--headless=new")
 options.add_argument("--disable-javascript")
 options.add_argument("--disable-extensions")
 options.add_argument("--no-sandbox")
@@ -140,7 +140,7 @@ def create_data_structure(screenshots_with_brand):
     for save_path, brand, val in screenshots_with_brand:
         colors_and_brand = extract_colors(save_path)
         features = colors_and_brand + [brand, val]
-        data.append(colors_and_brand) 
+        data.append(features) 
     return np.array(data)
 
 #------------------------------------------------------------------------------------------------------#
