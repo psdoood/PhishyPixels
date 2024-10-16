@@ -34,10 +34,22 @@ def main():
     phish_vals_test = test[:, -1]
     predictions = tree.predict(feature_test)
 
-    print("Calculating accuracy...")
+    print("Calculating results...")
     accuracy = np.mean(predictions == phish_vals_test)
 
-    print(f"Accuracy of PhishyPixels: {accuracy}")
+    num_actual_phish = sum(phish_vals_test == 1)
+    num_actual_legit = sum(phish_vals_test == 0)
+
+    num_correct_predicted_phish = sum((predictions == 1) & (phish_vals_test == 1))
+    num_false_predicted_phish = sum((predictions == 1) & (phish_vals_test == 0))
+
+    tpr = num_correct_predicted_phish / num_actual_phish
+    fpr = num_false_predicted_phish / num_actual_legit
+
+    print("RESULTS OF PHISHYPIXELS")
+    print(f"Accuracy: {accuracy}")
+    print(f"True positive rate (higher is better): {tpr}")
+    print(f"False positive rare (lower is better): {fpr}")
 
 
 if __name__ == "__main__":
