@@ -28,9 +28,9 @@ service = Service(ChromeDriverManager().install())
 legit_urls_filename = "data/tranco_3N84L.csv"
 legit_index = 1
 
-#phish_id, url, phish_detail_url, submission_time, verified, verification_time, online, target
-phish_urls_filename = "data/verified_online.csv"
-phish_index = 1
+#URLs from OpenPhish feed
+phish_urls_filename = "data/phish.csv"
+phish_index = 0
 
 #Number of urls to extract from each file
 NUM_OF_URLS = 100
@@ -77,7 +77,7 @@ def extract_text(screenshot):
 #Returns the brand name if it is in BRAND_NAMES, else returns -1
 def determine_brand(screenshot):
     text = extract_text(screenshot)
-    for i, name in BRAND_NAMES:
+    for i, name in enumerate(BRAND_NAMES):
         if name in text:
             return i
     return -1
@@ -138,7 +138,7 @@ def get_screenshot_and_brand(urls, is_phish):
         threads.append(thread)
         #If the max threads has been reached, let them all finish then empty the list
         if len(threads) >= NUM_OF_THREADS:
-            for thread in threads
+            for thread in threads:
                 thread.join()
             threads = []
     #Execute any remaining threads
