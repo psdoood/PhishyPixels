@@ -101,7 +101,7 @@ def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
             print(f"Error at this url: {url}")
             return
 
-        #Saves the screenshot to its assigned folder
+        #Saves screenshots to its assigned folder
         screenshot_dir = f"screenshots/{folder}"
         os.makedirs(screenshot_dir, exist_ok=True)
         save_path = os.path.join(screenshot_dir, f"{i}.png")
