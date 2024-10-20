@@ -43,7 +43,7 @@ TIME_OUT = 20
 #How many colors to extract from each image
 NUM_COLORS = 5
 #How many threads can run at a time
-NUM_OF_THREADS = 2
+NUM_OF_THREADS = 1
 
 #List of some of the more popular targeted websites to focus on
 BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'x', 'paypal', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
@@ -101,7 +101,10 @@ def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
             print(f"Error at this url: {url}")
             return
 
-        save_path = f"screenshots/{folder}/" + str(i) + ".png"
+        #Saves the screenshot to its assigned folder
+        screenshot_dir = f"screenshots/{folder}"
+        os.makedirs(screenshot_dir, exist_ok=True)
+        save_path = os.path.join(screenshot_dir, f"{i}.png")
         driver.save_screenshot(save_path)
             
         #Removes screenshot if it doesn't contain any brand from BRAND_NAMES
