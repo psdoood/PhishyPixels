@@ -39,11 +39,11 @@ phish_index = 0
 #Number of urls to extract from each file
 NUM_OF_URLS = 100
 #Seconds to try and load page before quiting
-TIME_OUT = 10
+TIME_OUT = 20
 #How many colors to extract from each image
 NUM_COLORS = 5
 #How many threads can run at a time
-NUM_OF_THREADS = 5
+NUM_OF_THREADS = 2
 
 #List of some of the more popular targeted websites to focus on
 BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'x', 'paypal', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
