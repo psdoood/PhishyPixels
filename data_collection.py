@@ -23,7 +23,7 @@ options.add_argument("--disable-javascript")
 options.add_argument("--disable-extensions")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-gpu")
-options.binary_location = r"user/bin/chromium-browser"
+options.binary_location = r"/usr/bin/chromium-browser"
 
 service = Service(r"/usr/bin/chromedriver")
 
@@ -89,6 +89,7 @@ def determine_brand(screenshot):
 #------------------------------------------------------------------------------------------------------#
 
 def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
+    driver = None
     try:
         print(f"Trying to access: {url}")
         driver = webdriver.Chrome(service=service, options=options)
