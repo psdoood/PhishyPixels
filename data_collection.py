@@ -6,7 +6,10 @@ import numpy as np
 from threading import Thread, Lock
 from PIL import Image
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#For windows:
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#For Linux (mint)
+pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options

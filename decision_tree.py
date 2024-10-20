@@ -38,7 +38,7 @@ class decision_tree:
     #Recursively builds the tree, passes in a node and checks if it will exceed max depth or 
     #if it is going to be a leaf node. Also handles splitting
     def expand_tree(self, current_node):
-        if current_node.depth >= self.max_depth or self.same_classification(current_node.data)
+        if current_node.depth >= self.max_depth or self.same_classification(current_node.data):
             current_node.is_leaf = True
             current_node.phish_val = np.round(np.mean(current_node.data[:, -1]))
             return

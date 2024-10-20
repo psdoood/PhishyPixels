@@ -1,5 +1,5 @@
 import data_collection as dc
-import decision_tree as dt
+import decision_tree as decision_tree
 import numpy as np
 
 def main():
@@ -25,7 +25,7 @@ def main():
     test = feature_data[split_point:]
 
     print("Building the decision tree with training data...")
-    tree = dt.decision_tree()
+    tree = decision_tree.decision_tree()
     tree.start_building(train)
     print("Finished building the decision tree.")
 
