@@ -11,6 +11,7 @@
 - selenium 
 - webdriver-manager (Chrome)
 - pytesseract
+- pillow
 
 ## Warning
 - I would advise using a VPN and a Virtual Machine if you are going to run this

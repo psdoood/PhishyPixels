@@ -25,7 +25,7 @@ service = Service(ChromeDriverManager().install())
 
 #May need to adjust these filename filepaths based on if you download different from what I did
 #Number, URL 
-legit_urls_filename = "data/tranco_3N84L.csv"
+legit_urls_filename = "data/top-500.csv"
 legit_index = 1
 
 #URLs from OpenPhish feed
