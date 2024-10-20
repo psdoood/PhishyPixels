@@ -23,8 +23,9 @@ options.add_argument("--disable-javascript")
 options.add_argument("--disable-extensions")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-gpu")
+options.binary_location = r"user/bin/chromium-browser"
 
-service = Service(ChromeDriverManager().install())
+service = Service(r"/usr/bin/chromedriver")
 
 #May need to adjust these filename filepaths based on if you download different from what I did
 #Number, URL 
