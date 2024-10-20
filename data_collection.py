@@ -43,10 +43,10 @@ TIME_OUT = 30
 #How many colors to extract from each image
 NUM_COLORS = 5
 #How many threads can run at a time
-NUM_OF_THREADS = 1
+NUM_OF_THREADS = 2
 
 #List of some of the more popular targeted websites to focus on
-BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'x', 'paypal', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
+BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -93,6 +93,9 @@ def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
     try:
         print(f"Trying to access: {url}")
         driver = webdriver.Chrome(service=service, options=options)
+        if not driver:
+            print(f"Failed to init driver for: {url}")
+            return
         driver.set_page_load_timeout(TIME_OUT)
         driver.get(url)
 
@@ -120,9 +123,10 @@ def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
         print(f"Screenshot successful: " + str(i) + f".png: {url}")
     except:
         print(f"Could not access: {url}")
-        
+
     finally:
-        driver.quit()
+        if driver:
+            driver.quit()
 
 
 #------------------------------------------------------------------------------------------------------#
