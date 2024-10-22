@@ -1,15 +1,6 @@
 import os
 import csv
-import colorgram as cg
 import numpy as np
-
-from threading import Thread, Lock
-from PIL import Image
-import pytesseract
-#For windows:
-#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-#For Linux (mint)
-pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -40,14 +31,6 @@ phish_index = 0
 NUM_OF_URLS = 100
 #Seconds to try and load page before quiting
 TIME_OUT = 30
-#How many colors to extract from each image
-NUM_COLORS = 5
-#How many threads can run at a time
-NUM_OF_THREADS = 2
-
-#List of some of the more popular targeted websites to focus on
-BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
-
 #------------------------------------------------------------------------------------------------------#
 
 #filename of the csv index, and index for the column the url is in.
@@ -69,25 +52,9 @@ def get_urls(filename, index):
     return urls 
 
 #------------------------------------------------------------------------------------------------------#
-
-#Extracts text out of an image (of a website)
-def extract_text(screenshot):
-    image = Image.open(screenshot)
-    text = pytesseract.image_to_string(image)
-    return text.lower()
-
-#------------------------------------------------------------------------------------------------------#
-
-#Returns the brand name if it is in BRAND_NAMES, else returns -1
-def determine_brand(screenshot):
-    text = extract_text(screenshot)
-    for i, name in enumerate(BRAND_NAMES):
-        if name in text:
-            return i
-    return -1
-
-#------------------------------------------------------------------------------------------------------#
-
+'''
+#How many threads can run at a time
+NUM_OF_THREADS = 2
 def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
     driver = None
     try:
@@ -127,23 +94,45 @@ def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
     finally:
         if driver:
             driver.quit()
-
+'''
 
 #------------------------------------------------------------------------------------------------------#
 
 #Takes and saves screenshots of each webpage to 'screenshots' and returns them in a list (now uses threading)
-def get_screenshot_and_brand(urls, is_phish):
-    screenshots_with_brand = []
-    threads = []
-    lock = Lock()
+def get_screenshots(urls, is_phish):
+    #threads = []
+    #lock = Lock()
 
-    if is_phish == True:
-        folder = "phish"
-        val = 0
-    else:
-        folder = "not_phish"
-        val = 1
+    driver = webdriver.Chrome(service=service, options=options)
+    driver.set_page_load_timeout(TIME_OUT)
+
+    for i, url in enumerate(urls):
+        try:
+            if is_phish == True:
+                folder = "phish"
+                val = 0
+            else:
+                folder = "not_phish"
+                val = 1
+
+            print(f"Trying to access: {url}")
+            driver.get(url)
+
+            #Ignores urls with error or 404 in title
+            if "error" in driver.title.lower() or "404" in driver.title.lower():
+                print(f"Error at this url: {url}")
+                continue
+
+            #Saves screenshots to its assigned folder
+            screenshot_dir = f"screenshots/{folder}"
+            os.makedirs(screenshot_dir, exist_ok=True)
+            save_path = os.path.join(screenshot_dir, f"{i}.png")
+            driver.save_screenshot(save_path)
+                
+        except:
+            print(f"Error in get_screenshots for: {url}")
     
+    '''
     #Creates threads for processing each url, depends pn NUM_OF_THREADS
     for i, url in enumerate(urls):
         thread = Thread(target=thread_process_url, args=(url, i, folder, val, screenshots_with_brand, lock))
@@ -157,29 +146,22 @@ def get_screenshot_and_brand(urls, is_phish):
     #Execute any remaining threads
     for thread in threads:
         thread.join()
-
-    return screenshots_with_brand
-
-#------------------------------------------------------------------------------------------------------#
-
-#Extracts the 5 most dominant colors from each screenshot
-def extract_colors(screenshot):
-    color_list = []
-    colors  = cg.extract(screenshot, NUM_COLORS)
-    for color in colors:
-        color_list.extend([color.rgb[0], color.rgb[1], color.rgb[2]])
-    return color_list
+    '''
 
 #------------------------------------------------------------------------------------------------------#
 
-#Creates the data strucutres [(15 values <5 * rgb>), (1 value <brand index>), (0 or 1 <0 is phish, 1 is not>)]
-def create_data_structure(screenshots_with_brand):
-    data = []
-    for save_path, brand, val in screenshots_with_brand:
-        colors_and_brand = extract_colors(save_path)
-        features = colors_and_brand + [brand, val]
-        data.append(features) 
-    return np.array(data)
+def main():
+    print("Collecting URLs...")
+    legit_urls = get_urls(legit_urls_filename, legit_index)
+    phish_urls = get_urls(phish_urls_filename, phish_index)
+    print("All URLs collected.")
+
+    print("Saving screenshots...")
+    get_screenshots(legit_urls, False)
+    get_screenshots(phish_urls, True)
+    print("Saved screenshots!")
 
 #------------------------------------------------------------------------------------------------------#
 
+if __name__ == '__main__':
+    main()

@@ -1,8 +1,10 @@
-import data_collection as dc
-import decision_tree as decision_tree
+import os
+import data_processing as dp
+import decision_tree as dt
 import numpy as np
 
 def main():
+    '''
     print("Collecting URLs...")
     legit_urls = dc.get_urls(dc.legit_urls_filename, dc.legit_index)
     phish_urls = dc.get_urls(dc.phish_urls_filename, dc.phish_index)
@@ -12,9 +14,29 @@ def main():
     legit_screenshots_with_brands = dc.get_screenshot_and_brand(legit_urls, False)
     phish_screenshots_with_brands = dc.get_screenshot_and_brand(phish_urls, True)
     print("Saved screenshots of relevent brand websites.")
+    '''
 
-    all_screenshots_with_brands = legit_screenshots_with_brands + phish_screenshots_with_brands
-    feature_data = dc.create_data_structure(all_screenshots_with_brands)
+    #<<<IMPORTANT>>>
+    #Must run data_collection.py first, I seperated this process to make the 
+    #decision tree testing faster
+
+    legit_dir = "screenshots/not_phish"
+    phish_dir = "screenshots/phish"
+
+    legit_paths = []
+    phish_paths = []
+
+    for file in os.listdir(legit_dir):
+        if file.endswith(".png"):
+            legit_paths.append(os.path.join(legit_dir, file))
+
+    for file in os.listdir(phish_dir):
+        if file.endswith(".png"):
+            phish_paths.append(os.path.join(phish_dir, file))
+
+    legit_feature_data = dp.create_data_structure(legit_paths, False)
+    phish_feature_data = dp.create_data_structure(phish_paths, True)
+    feature_data = np.vstack((legit_feature_data, phish_feature_data))
     print("Finished creating feature data structures from screenshots.")
 
     np.random.shuffle(feature_data)
@@ -25,7 +47,7 @@ def main():
     test = feature_data[split_point:]
 
     print("Building the decision tree with training data...")
-    tree = decision_tree.decision_tree()
+    tree = dt.decision_tree()
     tree.start_building(train)
     print("Finished building the decision tree.")
 
@@ -37,8 +59,8 @@ def main():
     print("Calculating results...")
     accuracy = np.mean(predictions == phish_vals_test)
 
-    num_actual_phish = sum(phish_vals_test == 1)
-    num_actual_legit = sum(phish_vals_test == 0)
+    num_actual_phish = sum(phish_vals_test == 0)
+    num_actual_legit = sum(phish_vals_test == 1)
 
     num_correct_predicted_phish = sum((predictions == 1) & (phish_vals_test == 1))
     num_false_predicted_phish = sum((predictions == 1) & (phish_vals_test == 0))
