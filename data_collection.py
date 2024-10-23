@@ -18,30 +18,28 @@ options.binary_location = r"/usr/bin/chromium-browser"
 
 service = Service(r"/usr/bin/chromedriver")
 
-#May need to adjust these filename filepaths based on if you download different from what I did
-#Number, URL 
-legit_urls_filename = "data/top-500.csv"
-legit_index = 1
+legit_urls_filename = "data/legit.csv"
+legit_index = 0
 
-#URLs from OpenPhish feed
 phish_urls_filename = "data/phish.csv"
 phish_index = 0
 
-#Number of urls to extract from each file
-NUM_OF_URLS = 100
 #Seconds to try and load page before quiting
 TIME_OUT = 30
+NUM_LEGIT_URLS = 250
+NUM_PHISH_URLS = 80
+
 #------------------------------------------------------------------------------------------------------#
 
 #filename of the csv index, and index for the column the url is in.
-def get_urls(filename, index):
+def get_urls(filename, index, num_urls):
     urls = []
     with open(filename, "r") as file:
         csvreader = csv.reader(file)
         #Skip first line of csv file
         next(csvreader)
         for i, row in enumerate(csvreader):
-            if i >= NUM_OF_URLS:
+            if i >= num_urls:
                 break
             else:
                 url = row[index]
@@ -152,8 +150,8 @@ def get_screenshots(urls, is_phish):
 
 def main():
     print("Collecting URLs...")
-    legit_urls = get_urls(legit_urls_filename, legit_index)
-    phish_urls = get_urls(phish_urls_filename, phish_index)
+    legit_urls = get_urls(legit_urls_filename, legit_index, NUM_LEGIT_URLS)
+    phish_urls = get_urls(phish_urls_filename, phish_index, NUM_PHISH_URLS)
     print("All URLs collected.")
 
     print("Saving screenshots...")

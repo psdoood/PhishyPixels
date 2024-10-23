@@ -13,7 +13,7 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 NUM_COLORS = 5
 
 #List of some of the more popular targeted websites to focus on
-BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'instagram', 'steam', 'apple', 'dhl', 'whatsapp']
+BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'instagram', 'steam', 'apple', 'whatsapp']
 
 #------------------------------------------------------------------------------------------------------#
 
