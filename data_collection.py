@@ -36,8 +36,6 @@ def get_urls(filename, index, num_urls):
     urls = []
     with open(filename, "r") as file:
         csvreader = csv.reader(file)
-        #Skip first line of csv file
-        next(csvreader)
         for i, row in enumerate(csvreader):
             if i >= num_urls:
                 break
