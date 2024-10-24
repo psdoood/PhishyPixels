@@ -1,24 +1,15 @@
+ #                      <<<IMPORTANT>>>
+#Must run data_collection.py first (unless screenshots folders are filled)
+#I seperated this process to make the decision tree testing/demo faster
+
 import os
 import data_processing as dp
 import decision_tree as dt
 import numpy as np
 
 def main():
-    '''
-    print("Collecting URLs...")
-    legit_urls = dc.get_urls(dc.legit_urls_filename, dc.legit_index)
-    phish_urls = dc.get_urls(dc.phish_urls_filename, dc.phish_index)
-    print("All URLs collected.")
 
-    print("Saving screenshots that are relevant...")
-    legit_screenshots_with_brands = dc.get_screenshot_and_brand(legit_urls, False)
-    phish_screenshots_with_brands = dc.get_screenshot_and_brand(phish_urls, True)
-    print("Saved screenshots of relevent brand websites.")
-    '''
-
-    #<<<IMPORTANT>>>
-    #Must run data_collection.py first, I seperated this process to make the 
-    #decision tree testing faster
+    print("\nScanning screenshots and creating feature data...")
 
     legit_dir = "screenshots/not_phish"
     phish_dir = "screenshots/phish"

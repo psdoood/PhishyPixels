@@ -39,8 +39,10 @@ def determine_brand(screenshot):
 def extract_colors(screenshot):
     color_list = []
     colors  = cg.extract(screenshot, NUM_COLORS)
+
     for color in colors:
         color_list.extend([color.rgb[0], color.rgb[1], color.rgb[2]])
+
     return color_list
 
 #------------------------------------------------------------------------------------------------------#
@@ -59,7 +61,8 @@ def create_data_structure(screenshots_paths, is_phish):
             colors = extract_colors(path)
             features = colors + [brand, val]
             data.append(features) 
+            print(f"Processed: {path} - {BRAND_NAMES[brand]}")
         else:
             print(f"No relevant brand found at: {path}")
             os.remove(path)
-    return np.array(data)
+    return np.array(data, dtype=object)
