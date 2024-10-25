@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 class node:
-    #data - the feature data array created in data_collection.py
+    #data - the feature data array created in data_collection.py (length of 17)
     #left_child/ right_child - binary tree children of current node
     #phish_val - the predicted classification, only useful for the leaf nodes
     #is_leaf - value is true if the node is a leaf node, false otherwise
@@ -109,7 +109,7 @@ class decision_tree:
         p = np.mean(phish_vals)
         
         #If the probability is 1 or 0 then the phish_vals are of the same classification
-        if p == 1 or p == 0:
+        if p >= 1 or p <= 0:
             return 0
 
         return -p * np.log2(p) - (1 - p) * np.log2(1 - p)
