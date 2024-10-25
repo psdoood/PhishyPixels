@@ -26,7 +26,7 @@ phish_index = 0
 
 #Seconds to try and load page before quiting
 TIME_OUT = 30
-NUM_LEGIT_URLS = 80
+NUM_LEGIT_URLS = 250
 NUM_PHISH_URLS = 500
 
 #------------------------------------------------------------------------------------------------------#
