@@ -1,4 +1,4 @@
- #                      <<<IMPORTANT>>>
+#                         <<<IMPORTANT>>>
 #Must run data_collection.py first (unless screenshots folders are filled)
 #I seperated this process to make the decision tree testing/demo faster
 
@@ -7,13 +7,25 @@ import data_processing as dp
 import decision_tree as dt
 import numpy as np
 
+def calculate_metrics(predictions, phish_vals_test):
+    num_actual_phish = np.sum(phish_vals_test == 0)
+    num_actual_legit = np.sum(phish_vals_test == 1)
+    print(f"Actual phishing sites used in testing: {num_actual_phish}")
+    print(f"Actual legitimate sites used in testing: {num_actual_legit}")
+    
+    num_correct_predicted_phish = np.sum((predictions == 0) & (phish_vals_test == 0))
+    num_false_predicted_phish = np.sum((predictions == 0) & (phish_vals_test == 1))
+    
+    tpr = num_correct_predicted_phish / num_actual_phish 
+    fpr = num_false_predicted_phish / num_actual_legit 
+    
+    return tpr, fpr
+
 def main():
-
     print("\nScanning screenshots and creating feature data...")
-
     legit_dir = "screenshots/not_phish"
     phish_dir = "screenshots/phish"
-
+    
     legit_paths = []
     phish_paths = []
 
@@ -27,15 +39,21 @@ def main():
 
     legit_feature_data = dp.create_data_structure(legit_paths, False)
     phish_feature_data = dp.create_data_structure(phish_paths, True)
-    feature_data = np.vstack((legit_feature_data, phish_feature_data))
     print("Finished creating feature data structures from screenshots.")
 
-    np.random.shuffle(feature_data)
+    np.random.shuffle(legit_feature_data)
+    np.random.shuffle(phish_feature_data)
 
-    #Split the data (80:20) for training and testing
-    split_point = int(0.8 * len(feature_data))
-    train = feature_data[:split_point]
-    test = feature_data[split_point:]
+    legit_split_point = int(0.8 * len(legit_feature_data))
+    phish_split_point = int(0.8 * len(phish_feature_data))
+
+    legit_train = legit_feature_data[:legit_split_point]
+    legit_test = legit_feature_data[legit_split_point:]
+    phish_train = phish_feature_data[:phish_split_point]
+    phish_test = phish_feature_data[phish_split_point:]
+
+    train = np.vstack((legit_train, phish_train))
+    test = np.vstack((legit_test, phish_test))
 
     print("Building the decision tree with training data...")
     tree = dt.decision_tree()
@@ -49,20 +67,12 @@ def main():
 
     print("Calculating results...")
     accuracy = np.mean(predictions == phish_vals_test)
-
-    num_actual_phish = sum(phish_vals_test == 0)
-    num_actual_legit = sum(phish_vals_test == 1)
-
-    num_correct_predicted_phish = sum((predictions == 1) & (phish_vals_test == 1))
-    num_false_predicted_phish = sum((predictions == 1) & (phish_vals_test == 0))
-
-    tpr = num_correct_predicted_phish / num_actual_phish
-    fpr = num_false_predicted_phish / num_actual_legit
-
-    print("RESULTS OF PHISHYPIXELS")
+    tpr, fpr = calculate_metrics(predictions, phish_vals_test)
+    
+    print("\nRESULTS OF PHISHYPIXELS:\n")
     print(f"Accuracy: {accuracy}")
     print(f"True positive rate (higher is better): {tpr}")
-    print(f"False positive rare (lower is better): {fpr}")
+    print(f"False positive rate (lower is better): {fpr}")
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ NUM_COLORS = 5
 
 #List of some of the more popular targeted websites to focus on
 BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'instagram', 'steam', 'apple', 'whatsapp']
-
+#BRAND_NAMES = ['facebook', 'microsoft', 'tiktok', 'amazon', 'linkedin', 'paypal', 'instagram', 'steam', 'apple']
 #------------------------------------------------------------------------------------------------------#
 
 #Extracts text out of an image (of a website)

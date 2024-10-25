@@ -48,51 +48,6 @@ def get_urls(filename, index, num_urls):
     return urls 
 
 #------------------------------------------------------------------------------------------------------#
-'''
-#How many threads can run at a time
-NUM_OF_THREADS = 2
-def thread_process_url(url, i, folder, val, screenshots_with_brand, lock):
-    driver = None
-    try:
-        print(f"Trying to access: {url}")
-        driver = webdriver.Chrome(service=service, options=options)
-        if not driver:
-            print(f"Failed to init driver for: {url}")
-            return
-        driver.set_page_load_timeout(TIME_OUT)
-        driver.get(url)
-
-        #Ignores urls with error or 404 in title
-        if "error" in driver.title.lower() or "404" in driver.title.lower():
-            print(f"Error at this url: {url}")
-            return
-
-        #Saves screenshots to its assigned folder
-        screenshot_dir = f"screenshots/{folder}"
-        os.makedirs(screenshot_dir, exist_ok=True)
-        save_path = os.path.join(screenshot_dir, f"{i}.png")
-        driver.save_screenshot(save_path)
-            
-        #Removes screenshot if it doesn't contain any brand from BRAND_NAMES
-        brand = determine_brand(save_path)
-        if brand == -1:
-            print(f"Unrelated brand, not saving...")
-            os.remove(save_path)
-            return 
-        
-        #Lock must be aquired first before continuing
-        with lock:
-            screenshots_with_brand.append([save_path, brand, val])
-        print(f"Screenshot successful: " + str(i) + f".png: {url}")
-    except:
-        print(f"Could not access: {url}")
-
-    finally:
-        if driver:
-            driver.quit()
-'''
-
-#------------------------------------------------------------------------------------------------------#
 
 #Takes and saves screenshots of each webpage to 'screenshots' and returns them in a list (now uses threading)
 def get_screenshots(urls, is_phish):
@@ -122,27 +77,11 @@ def get_screenshots(urls, is_phish):
             #Saves screenshots to its assigned folder
             screenshot_dir = f"screenshots/{folder}"
             os.makedirs(screenshot_dir, exist_ok=True)
-            save_path = os.path.join(screenshot_dir, f"{i}.png")
+            save_path = os.path.join(screenshot_dir, f"scan2-{i}.png")
             driver.save_screenshot(save_path)
                 
         except:
             print(f"Error in get_screenshots for: {url}")
-    
-    '''
-    #Creates threads for processing each url, depends pn NUM_OF_THREADS
-    for i, url in enumerate(urls):
-        thread = Thread(target=thread_process_url, args=(url, i, folder, val, screenshots_with_brand, lock))
-        thread.start()
-        threads.append(thread)
-        #If the max threads has been reached, let them all finish then empty the list
-        if len(threads) >= NUM_OF_THREADS:
-            for thread in threads:
-                thread.join()
-            threads = []
-    #Execute any remaining threads
-    for thread in threads:
-        thread.join()
-    '''
 
 #------------------------------------------------------------------------------------------------------#
 
