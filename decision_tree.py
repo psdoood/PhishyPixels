@@ -29,8 +29,7 @@ class decision_tree:
 
     #Starts the process of building the tree, converts data to column stack and calls expand_tree (recursive)
     def start_building(self, features):
-        data = np.column_stack(features)
-        self.root.data = data
+        self.root.data = features
         self.expand_tree(self.root)
 
     #------------------------------------------------------------------------------------------------------#
