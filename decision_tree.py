@@ -22,7 +22,7 @@ class node:
 
 
 class decision_tree:
-    def __init__(self, max_depth=200):
+    def __init__(self, max_depth=100):
         self.max_depth = max_depth
         self.root = node(depth=0)
 
@@ -38,9 +38,17 @@ class decision_tree:
     #Recursively builds the tree, passes in a node and checks if it will exceed max depth or 
     #if it is going to be a leaf node. Also handles splitting
     def expand_tree(self, current_node):
+        #If the data is empty, mark it as empty and create a leaf node
+        if len(current_node.data) == 0:
+            current_node.is_leaf = True;
+            current_node.phish_val = -1; #empty data
+            return 
+        
+        #If the data is 1D, force reshape it to be 2D 
         if len(current_node.data.shape) == 1:
             current_node.data = current_node.data.reshape(1, EXPECTED_FEATURES)
-
+        
+        #Check to see if a leaf node condition has been reached
         if current_node.depth >= self.max_depth or self.same_classification(current_node.data):
             current_node.is_leaf = True
             current_node.phish_val = np.round(np.mean(current_node.data[:, -1]))
@@ -48,6 +56,12 @@ class decision_tree:
 
         #Determine best_split and create child nodes
         best_feature_column, best_split_value = self.best_split(current_node.data)
+        
+        #This checks for if the entropy returned as 0
+        if(best_feature_column == None or best_split_value == None):
+            current_node.is_leaf = True
+            current_node.phish_val = np.round(np.mean(current_node.data[:, -1]))
+            return
 
         left_data, right_data = self.split_by_feature(current_node.data, best_feature_column, best_split_value)
 
@@ -64,7 +78,7 @@ class decision_tree:
 
     #Returns the feature in the data with the highest information gain, there will be the split
     def best_split(self, data):
-        best_info_gain = -math.inf
+        best_info_gain = 0.0001
         best_feature_column = None
         best_split_value = None
         num_features = 16 #15 RBG values and one brand val
@@ -72,19 +86,22 @@ class decision_tree:
         #Only need to calculate parent entropy once for each split 
         parent_entropy = self.entropy(data)
 
+        if(parent_entropy == 0):
+            return None, None
+
         #Determines what feature is going to be best to split on
         for feature in range(num_features):
             feature_vals = np.unique(data[:, feature])
-
-            #NOTETOSELF: might want to change to different feature_vals to iterate through if causing problems
-
-            for split_value in feature_vals:
-                info_gain = self.information_gain(data, feature, split_value, parent_entropy)
+            
+            for i in range(len(feature_vals) - 1):
+                #Find the value between current feature and the next to split on
+                split_val = (feature_vals[i] + feature_vals[i + 1]) / 2 
+                info_gain = self.information_gain(data, feature, split_val, parent_entropy)
                 if info_gain > best_info_gain:
                     best_info_gain = info_gain
                     best_feature_column = feature
-                    best_split_value = split_value
-        
+                    best_split_value = split_val
+
         return best_feature_column, best_split_value
 
     #------------------------------------------------------------------------------------------------------#
@@ -96,12 +113,15 @@ class decision_tree:
 
         if len(left_child) == 0 or len(right_child) == 0:
             return 0
+        
+        left_weight = len(left_child) / len(data)
+        right_weight = len(right_child) / len(data)
 
         left_child_entropy = self.entropy(left_child)
         right_child_entropy = self.entropy(right_child)
-        average_child_entropy = (left_child_entropy + right_child_entropy) / 2 #NOTETOSELF: May want to switch to weighted average
+        weighted_child_entropy = (left_weight * left_child_entropy + right_weight * right_child_entropy) 
 
-        return parent_entropy - average_child_entropy
+        return parent_entropy - weighted_child_entropy
 
     #------------------------------------------------------------------------------------------------------#
 

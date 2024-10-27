@@ -44,7 +44,7 @@ def extract_colors(screenshot):
     colors  = cg.extract(screenshot, NUM_COLORS)
 
     for color in colors:
-        color_list.extend([color.rgb[0], color.rgb[1], color.rgb[2]])
+        color_list.extend([color.rgb[0] / 255.0, color.rgb[1] / 255.0, color.rgb[2] / 255.0])
 
     return color_list
 
@@ -62,7 +62,7 @@ def create_data_structure(screenshots_paths, is_phish):
         brand = determine_brand(path)
         if brand != -1:
             colors = extract_colors(path)
-            features = colors + [brand, val]
+            features = colors + [(brand / len(BRAND_NAMES)), val]
             if(len(features) == EXPECTED_FEATURES):
                 data.append(features) 
                 print(f"Processed: {path} - {BRAND_NAMES[brand]}")
@@ -72,6 +72,8 @@ def create_data_structure(screenshots_paths, is_phish):
             print(f"No relevant brand found at: {path}")
             os.remove(path)
     if len(data) > 0:
+        #Return the data in the correct array shape
         return np.array(data, dtype=float).reshape(len(data), EXPECTED_FEATURES)
     else:
+        #Return an empty array if data wasnt created
         return np.array(data, dtype=float).reshape(0, EXPECTED_FEATURES)
