@@ -11,6 +11,9 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 
 #How many colors to extract from each image
 NUM_COLORS = 5
+#How many features should be present in each data structure
+#3 color vals for each + brand val + phish_val
+EXPECTED_FEATURES = NUM_COLORS * 3 + 2 
 
 #List of some of the more popular targeted websites to focus on
 BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'instagram', 'steam', 'apple', 'whatsapp']
@@ -60,8 +63,11 @@ def create_data_structure(screenshots_paths, is_phish):
         if brand != -1:
             colors = extract_colors(path)
             features = colors + [brand, val]
-            data.append(features) 
-            print(f"Processed: {path} - {BRAND_NAMES[brand]}")
+            if(len(features) == EXPECTED_FEATURES):
+                data.append(features) 
+                print(f"Processed: {path} - {BRAND_NAMES[brand]}")
+            else:
+                print(f"Path at {path} has wrong feature length, ignoring...")
         else:
             print(f"No relevant brand found at: {path}")
             os.remove(path)
