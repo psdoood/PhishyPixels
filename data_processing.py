@@ -71,4 +71,7 @@ def create_data_structure(screenshots_paths, is_phish):
         else:
             print(f"No relevant brand found at: {path}")
             os.remove(path)
-    return np.array(data, dtype=object)
+    if len(data) > 0:
+        return np.array(data, dtype=float).reshape(len(data), EXPECTED_FEATURES)
+    else:
+        return np.array(data, dtype=float).reshape(0, EXPECTED_FEATURES)

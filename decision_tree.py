@@ -1,5 +1,6 @@
 import numpy as np 
 import math
+from data_processing import EXPECTED_FEATURES
 
 class node:
     #data - the feature data array created in data_collection.py (length of 17)
@@ -21,7 +22,7 @@ class node:
 
 
 class decision_tree:
-    def __init__(self, max_depth=100):
+    def __init__(self, max_depth=200):
         self.max_depth = max_depth
         self.root = node(depth=0)
 
@@ -37,6 +38,9 @@ class decision_tree:
     #Recursively builds the tree, passes in a node and checks if it will exceed max depth or 
     #if it is going to be a leaf node. Also handles splitting
     def expand_tree(self, current_node):
+        if len(current_node.data.shape) == 1:
+            current_node.data = current_node.data.reshape(1, EXPECTED_FEATURES)
+
         if current_node.depth >= self.max_depth or self.same_classification(current_node.data):
             current_node.is_leaf = True
             current_node.phish_val = np.round(np.mean(current_node.data[:, -1]))

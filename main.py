@@ -44,8 +44,8 @@ def main():
     np.random.shuffle(legit_feature_data)
     np.random.shuffle(phish_feature_data)
 
-    legit_split_point = int(0.8 * len(legit_feature_data))
-    phish_split_point = int(0.8 * len(phish_feature_data))
+    legit_split_point = int(0.7 * len(legit_feature_data))
+    phish_split_point = int(0.7 * len(phish_feature_data))
 
     legit_train = legit_feature_data[:legit_split_point]
     legit_test = legit_feature_data[legit_split_point:]
