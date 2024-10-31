@@ -78,11 +78,11 @@ class decision_tree:
 
     #Returns the feature in the data with the highest information gain, there will be the split
     def best_split(self, data):
-        best_info_gain = 0.0001
+        best_info_gain = 0.01
         best_feature_column = None
         best_split_value = None
-        num_features = 16 #15 RBG values and one brand val
-
+        num_features = 33 #32 RBG values (including proportion) and one brand val
+        
         #Only need to calculate parent entropy once for each split 
         parent_entropy = self.entropy(data)
 

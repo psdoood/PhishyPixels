@@ -10,10 +10,10 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 #pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 #How many colors to extract from each image
-NUM_COLORS = 5
+NUM_COLORS = 8
 #How many features should be present in each data structure
-#3 color vals for each + brand val + phish_val
-EXPECTED_FEATURES = NUM_COLORS * 3 + 2 
+#3 color vals + proportion for each + brand val + phish_val
+EXPECTED_FEATURES = NUM_COLORS * 4 + 2 
 
 #List of some of the more popular targeted websites to focus on
 BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'instagram', 'steam', 'apple', 'whatsapp']
@@ -43,8 +43,15 @@ def extract_colors(screenshot):
     color_list = []
     colors  = cg.extract(screenshot, NUM_COLORS)
 
+    total_proportion = sum(c.proportion for c in colors);
+
     for color in colors:
         color_list.extend([color.rgb[0] / 255.0, color.rgb[1] / 255.0, color.rgb[2] / 255.0])
+        color_list.append(color.proportion / total_proportion)
+    
+    #If there is less than NUM_COLORS in the screenshot, add dummy color
+    while len(color_list) < (NUM_COLORS * 4):
+        color_list.extend([0.0, 0.0, 0.0, 0.0])
 
     return color_list
 

@@ -7,6 +7,8 @@ import data_processing as dp
 import decision_tree as dt
 import numpy as np
 
+#Simply calculates the metrics that are being used to measure results of the 
+#test data, returns true positive rate and false positive rate
 def calculate_metrics(predictions, phish_vals_test):
     num_actual_phish = np.sum(phish_vals_test == 0)
     num_actual_legit = np.sum(phish_vals_test == 1)
@@ -29,14 +31,18 @@ def main():
     legit_paths = []
     phish_paths = []
 
+    #Collect the paths from the legit folder (screenshots)
     for file in os.listdir(legit_dir):
         if file.endswith(".png"):
             legit_paths.append(os.path.join(legit_dir, file))
-
+    
+    #Collect the paths from the phish folder (screenshots)
     for file in os.listdir(phish_dir):
         if file.endswith(".png"):
             phish_paths.append(os.path.join(phish_dir, file))
 
+    #Creates the feature data structures for both legit and phish
+    #Each entry has 17 values, [color(15) + brand(1) + phish_val(1)]
     legit_feature_data = dp.create_data_structure(legit_paths, False)
     phish_feature_data = dp.create_data_structure(phish_paths, True)
     print("Finished creating feature data structures from screenshots.")
@@ -44,6 +50,7 @@ def main():
     np.random.shuffle(legit_feature_data)
     np.random.shuffle(phish_feature_data)
 
+    #Creates a splitting point for seperating the data into test and train
     legit_split_point = int(0.8 * len(legit_feature_data))
     phish_split_point = int(0.8 * len(phish_feature_data))
 
@@ -77,6 +84,21 @@ def main():
     print(f"Accuracy: {accuracy}")
     print(f"True positive rate (higher is better): {tpr}")
     print(f"False positive rate (lower is better): {fpr}")
+
+    print(f"Training data shape: {train.shape}")
+    print(f"Testing data shape: {test.shape}")
+    print(f"Number of features: {train.shape[1]}")
+    print(f"Number of phishing samples in training: {np.sum(train[:, -1] == 0)}")
+    print(f"Number of legitimate samples in training: {np.sum(train[:, -1] == 1)}")
+
+    # Verify no NaN values
+    if np.isnan(train).any() or np.isnan(test).any():
+        print("Warning: Dataset contains NaN values!")
+
+    # Verify feature ranges
+    feature_min = np.min(train[:, :-1])
+    feature_max = np.max(train[:, :-1])
+    print(f"Feature value range: {feature_min} to {feature_max}")
 
 
 if __name__ == "__main__":
