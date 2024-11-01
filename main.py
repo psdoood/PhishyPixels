@@ -62,7 +62,6 @@ def main():
     train = np.vstack((legit_train, phish_train))
     test = np.vstack((legit_test, phish_test))
 
-    #Extra shuffling (maybe not needed. but it makes me happy :) )
     np.random.shuffle(train);
     np.random.shuffle(test);
 

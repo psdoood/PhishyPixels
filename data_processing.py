@@ -12,7 +12,7 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 #How many colors to extract from each image
 NUM_COLORS = 8
 #How many features should be present in each data structure
-#3 color vals + proportion for each + brand val + phish_val
+#3 color vals + proportion for each of NUM_COLORS + brand val + phish_val
 EXPECTED_FEATURES = NUM_COLORS * 4 + 2 
 
 #List of some of the more popular targeted websites to focus on

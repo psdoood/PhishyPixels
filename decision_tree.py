@@ -125,7 +125,7 @@ class decision_tree:
 
     #------------------------------------------------------------------------------------------------------#
 
-    #Calculates the binary entropy using phish_val (either 0 or 1) 
+    #Calculates the binary entropy using phish_val (phish_val is either 0 or 1) 
     #<https://en.wikipedia.org/wiki/Binary_entropy_function>
     def entropy(self, data):
         phish_vals = data[:, -1]
