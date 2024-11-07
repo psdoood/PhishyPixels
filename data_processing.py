@@ -9,56 +9,44 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 #For Linux (mint)
 #pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
-#How many colors to extract from each image
-NUM_COLORS = 8
-#How many features should be present in each data structure
-#3 color vals + proportion for each of NUM_COLORS + brand val + phish_val
-EXPECTED_FEATURES = NUM_COLORS * 4 + 2 
-
 #List of some of the more popular targeted websites to focus on
-BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'youtube', 'amazon', 'linkedin', 'twitter', 'paypal', 'instagram', 'steam', 'apple', 'whatsapp']
-#BRAND_NAMES = ['facebook', 'microsoft', 'tiktok', 'amazon', 'linkedin', 'paypal', 'instagram', 'steam', 'apple']
-#------------------------------------------------------------------------------------------------------#
-
-#Extracts text out of an image (of a website)
-def extract_text(screenshot):
-    image = Image.open(screenshot)
-    text = pytesseract.image_to_string(image)
-    return text.lower()
-
-#------------------------------------------------------------------------------------------------------#
-
-#Returns the brand name if it is in BRAND_NAMES, else returns -1
-def determine_brand(screenshot):
-    text = extract_text(screenshot)
-    for i, name in enumerate(BRAND_NAMES):
-        if name in text:
-            return i
-    return -1
+BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'amazon', 'paypal', 'instagram', 'steam', 'apple', 'whatsapp']
+NUM_BRAND_FEATURES = len(BRAND_NAMES)
+#How many colors to extract from each image
+NUM_COLORS = 5
+NUM_COLOR_FEATURES = 2
+#How many features should be present in each data structure
+#3 color vals + proportion for each of NUM_COLORS + brand vals + phish_val
+EXPECTED_FEATURES = NUM_COLORS * NUM_COLOR_FEATURES + NUM_BRAND_FEATURES + 1 
 
 #------------------------------------------------------------------------------------------------------#
 
 #Extracts the 5 most dominant colors from each screenshot
 def extract_colors(screenshot):
-    color_list = []
+    hex_color_list = []
     colors  = cg.extract(screenshot, NUM_COLORS)
 
-    total_proportion = sum(c.proportion for c in colors);
+    #total_proportion = sum(c.proportion for c in colors);
 
     for color in colors:
-        color_list.extend([color.rgb[0] / 255.0, color.rgb[1] / 255.0, color.rgb[2] / 255.0])
-        color_list.append(color.proportion / total_proportion)
+        #prop = color.proportion / total_proportion
+        #color_list.extend([color.rgb[0] / 255.0, color.rgb[1] / 255.0, color.rgb[2] / 255.0, prop])
+        hex_val = float((color.rgb[0] << 16) + (color.rgb[1] << 8) + color.rgb[2]) / float(0xFFFFFF)
+        hex_color_list.append(hex_val)
+        #hex_color_list.append(prop)
     
     #If there is less than NUM_COLORS in the screenshot, add dummy color
-    while len(color_list) < (NUM_COLORS * 4):
-        color_list.extend([0.0, 0.0, 0.0, 0.0])
+    while len(hex_color_list) < (NUM_COLORS * NUM_COLOR_FEATURES):
+        #hex_color_list.extend([0.0, 0.0, 0.0, 0.0])
+       # hex_color_list.append(0.0)
+        hex_color_list.append(0.0)
 
-    return color_list
+    return hex_color_list
 
 #------------------------------------------------------------------------------------------------------#
 
 #Creates the data strucutres [(15 values <5 * rgb>), (1 value <brand index>), (0 or 1 <0 is phish, 1 is not>)]
-def create_data_structure(screenshots_paths, is_phish):
+def create_data_structure(screenshots_paths, brand_index, is_phish):
     data = []
     if is_phish == True:
         val = 0
@@ -66,21 +54,24 @@ def create_data_structure(screenshots_paths, is_phish):
         val = 1
 
     for path in screenshots_paths:
-        brand = determine_brand(path)
-        if brand != -1:
-            colors = extract_colors(path)
-            features = colors + [(brand / len(BRAND_NAMES)), val]
-            if(len(features) == EXPECTED_FEATURES):
-                data.append(features) 
-                print(f"Processed: {path} - {BRAND_NAMES[brand]}")
-            else:
-                print(f"Path at {path} has wrong feature length, ignoring...")
+        colors = extract_colors(path)
+
+        #Each brand has its own index in the data structure, so the values are just 0 or 1
+        brand_features = [0] * len(BRAND_NAMES)
+        brand_features[brand_index] = 1
+
+        features = colors + brand_features + [val]
+
+        if(len(features) == EXPECTED_FEATURES):
+            data.append(features) 
+            print(f"Processed: {path} - {BRAND_NAMES[brand_index]}")
         else:
-            print(f"No relevant brand found at: {path}")
-            os.remove(path)
+            print(f"Path at {path} has wrong feature length, ignoring...")
+    
     if len(data) > 0:
+        data_array = np.array(data, dtype=float)
         #Return the data in the correct array shape
-        return np.array(data, dtype=float).reshape(len(data), EXPECTED_FEATURES)
+        return data_array.reshape(len(data), EXPECTED_FEATURES)
     else:
         #Return an empty array if data wasnt created
         return np.array(data, dtype=float).reshape(0, EXPECTED_FEATURES)
