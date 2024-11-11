@@ -13,10 +13,10 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'amazon', 'paypal', 'instagram', 'steam', 'apple', 'whatsapp']
 NUM_BRAND_FEATURES = len(BRAND_NAMES)
 #How many colors to extract from each image
-NUM_COLORS = 5
-NUM_COLOR_FEATURES = 2
+NUM_COLORS = 4
+#This was from when I was also tracking proportion for each color, but I feel like it wasnt improving metrics
+NUM_COLOR_FEATURES = 1
 #How many features should be present in each data structure
-#3 color vals + proportion for each of NUM_COLORS + brand vals + phish_val
 EXPECTED_FEATURES = NUM_COLORS * NUM_COLOR_FEATURES + NUM_BRAND_FEATURES + 1 
 
 #------------------------------------------------------------------------------------------------------#
@@ -26,26 +26,20 @@ def extract_colors(screenshot):
     hex_color_list = []
     colors  = cg.extract(screenshot, NUM_COLORS)
 
-    #total_proportion = sum(c.proportion for c in colors);
-
     for color in colors:
-        #prop = color.proportion / total_proportion
-        #color_list.extend([color.rgb[0] / 255.0, color.rgb[1] / 255.0, color.rgb[2] / 255.0, prop])
+        #Convert to hex and normalize the value
         hex_val = float((color.rgb[0] << 16) + (color.rgb[1] << 8) + color.rgb[2]) / float(0xFFFFFF)
         hex_color_list.append(hex_val)
-        #hex_color_list.append(prop)
-    
+        
     #If there is less than NUM_COLORS in the screenshot, add dummy color
     while len(hex_color_list) < (NUM_COLORS * NUM_COLOR_FEATURES):
-        #hex_color_list.extend([0.0, 0.0, 0.0, 0.0])
-       # hex_color_list.append(0.0)
         hex_color_list.append(0.0)
 
     return hex_color_list
 
 #------------------------------------------------------------------------------------------------------#
 
-#Creates the data strucutres [(15 values <5 * rgb>), (1 value <brand index>), (0 or 1 <0 is phish, 1 is not>)]
+#Creates the data strucutres [(colors), (brands), (0 or 1 <0 is phish, 1 is not>)]
 def create_data_structure(screenshots_paths, brand_index, is_phish):
     data = []
     if is_phish == True:
@@ -59,7 +53,6 @@ def create_data_structure(screenshots_paths, brand_index, is_phish):
         #Each brand has its own index in the data structure, so the values are just 0 or 1
         brand_features = [0] * len(BRAND_NAMES)
         brand_features[brand_index] = 1
-
         features = colors + brand_features + [val]
 
         if(len(features) == EXPECTED_FEATURES):
