@@ -13,7 +13,7 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tessera
 BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'amazon', 'paypal', 'instagram', 'steam', 'apple', 'whatsapp']
 NUM_BRAND_FEATURES = len(BRAND_NAMES)
 #How many colors to extract from each image
-NUM_COLORS = 4
+NUM_COLORS = 3
 #This was from when I was also tracking proportion for each color, but I feel like it wasnt improving metrics
 NUM_COLOR_FEATURES = 1
 #How many features should be present in each data structure
