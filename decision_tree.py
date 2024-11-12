@@ -58,12 +58,12 @@ class decision_tree:
         num_phish = np.sum(current_node.data[:,-1] == 0)
         phish_ratio = num_phish / len(current_node.data)
 
-        if phish_ratio < 0.1:
+        if phish_ratio < 0.15:
             current_node.is_leaf = True
             current_node.phish_val = 1 
             return 
         
-        if phish_ratio > 0.9:
+        if phish_ratio > 0.85:
             current_node.is_leaf = True
             current_node.phish_val = 0 
             return 
@@ -116,12 +116,13 @@ class decision_tree:
                         best_feature_column = feature
                         best_split_value = 0
 
-        if best_feature_column is None and parent_entropy > 0.15: 
+        if best_feature_column is None and parent_entropy > 0.25: 
             for feature in range(num_color_features):
                 feature_vals_padded = np.unique(data[:, feature])
                 #Ignore padded colors
                 feature_vals = feature_vals_padded[feature_vals_padded != 0.0] 
-                split_points = np.percentile(feature_vals, [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95])
+                split_points = np.percentile(feature_vals, [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99])
+                #split_points = np.percentile(feature_vals, [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 99])
                 if len(split_points) > 1:
                     for split_val in split_points:
                         info_gain = self.information_gain(data, feature, split_val, parent_entropy)
@@ -154,10 +155,10 @@ class decision_tree:
         gain = parent_entropy - weighted_child_entropy
 
         balance = 1 - abs(left_child_entropy - right_child_entropy)
-
+        
         if feature_column >= NUM_COLOR_FEATURES * NUM_COLORS:
             #If split creates a right child that is very "pure"
-            if right_child_entropy < 0.15 or left_child_entropy < 0.15:
+            if right_child_entropy < 0.1 or left_child_entropy < 0.1:
                 return gain * 2.5
             return gain * 1.5
 
@@ -175,7 +176,7 @@ class decision_tree:
         p = np.mean(phish_vals)
         
         #If the probability is 1 or 0 then the phish_vals are of the same classification 
-        if p < 0.05 or p > 0.95:
+        if p < 0.1 or p > 0.9:
             return 0
 
         return -p * np.log2(p) - (1 - p) * np.log2(1 - p)
