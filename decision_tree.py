@@ -116,7 +116,7 @@ class decision_tree:
                         best_feature_column = feature
                         best_split_value = 0
 
-        if best_feature_column is None and parent_entropy > 0.25: 
+        if best_info_gain == 0.0: 
             for feature in range(num_color_features):
                 feature_vals_padded = np.unique(data[:, feature])
                 #Ignore padded colors
@@ -126,6 +126,8 @@ class decision_tree:
                 if len(split_points) > 1:
                     for split_val in split_points:
                         info_gain = self.information_gain(data, feature, split_val, parent_entropy)
+                        if feature == 0:
+                            info_gain *= 2.0
                         if info_gain > best_info_gain:
                             best_info_gain = info_gain
                             best_feature_column = feature
