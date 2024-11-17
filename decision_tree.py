@@ -58,12 +58,12 @@ class decision_tree:
         num_phish = np.sum(current_node.data[:,-1] == 0)
         phish_ratio = num_phish / len(current_node.data)
 
-        if phish_ratio < 0.15:
+        if phish_ratio < 0.2:
             current_node.is_leaf = True
             current_node.phish_val = 1 
             return 
         
-        if phish_ratio > 0.85:
+        if phish_ratio > 0.8:
             current_node.is_leaf = True
             current_node.phish_val = 0 
             return 
