@@ -1,14 +1,13 @@
 import os
 import csv
-import numpy as np
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-#Allows selenium to be run in a non GUI environment and downloads a chrome driver
 options = Options()
+#Allows selenium to be run in a non GUI environment + other browser options
 options.add_argument("--headless=new")
 options.add_argument("--disable-javascript")
 options.add_argument("--disable-extensions")
@@ -24,14 +23,14 @@ legit_index = 0
 phish_urls_filename = "data/phish.csv"
 phish_index = 0
 
-#Seconds to try and load page before quiting
+#Seconds to try and load page before quitting
 TIME_OUT = 30
+#Max amount of URLs to collect from each csv file on each run
 NUM_LEGIT_URLS = 250
 NUM_PHISH_URLS = 500
 
-#------------------------------------------------------------------------------------------------------#
 
-#filename of the csv index, and index for the column the url is in.
+#Filename of the csv index, and index for the column the url is in.
 def get_urls(filename, index, num_urls):
     urls = []
     with open(filename, "r") as file:
@@ -41,19 +40,14 @@ def get_urls(filename, index, num_urls):
                 break
             else:
                 url = row[index]
-                #Add scheme if the csv file doesnt include them 
+                #Add scheme if the csv file doesn't include them 
                 if not url.startswith(("https://", "http://")):
                     url = "https://" + url
                 urls.append(url)
     return urls 
 
-#------------------------------------------------------------------------------------------------------#
-
-#Takes and saves screenshots of each webpage to 'screenshots' and returns them in a list (now uses threading)
+#Takes and saves screenshots of each webpage to '/screenshots'
 def get_screenshots(urls, is_phish):
-    #threads = []
-    #lock = Lock()
-
     driver = webdriver.Chrome(service=service, options=options)
     driver.set_page_load_timeout(TIME_OUT)
 
@@ -61,20 +55,17 @@ def get_screenshots(urls, is_phish):
         try:
             if is_phish == True:
                 folder = "phish"
-                val = 0
+        
             else:
                 folder = "not_phish"
-                val = 1
 
             print(f"Trying to access: {url}")
             driver.get(url)
 
-            #Ignores urls with error or 404 in title
             if "error" in driver.title.lower() or "404" in driver.title.lower():
                 print(f"Error at this url: {url}")
                 continue
 
-            #Saves screenshots to its assigned folder
             screenshot_dir = f"screenshots/{folder}"
             os.makedirs(screenshot_dir, exist_ok=True)
             save_path = os.path.join(screenshot_dir, f"scan2-{i}.png")
@@ -82,8 +73,6 @@ def get_screenshots(urls, is_phish):
                 
         except:
             print(f"Error in get_screenshots for: {url}")
-
-#------------------------------------------------------------------------------------------------------#
 
 def main():
     print("Collecting URLs...")
@@ -95,8 +84,6 @@ def main():
     get_screenshots(legit_urls, False)
     get_screenshots(phish_urls, True)
     print("Saved screenshots!")
-
-#------------------------------------------------------------------------------------------------------#
 
 if __name__ == '__main__':
     main()
