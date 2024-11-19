@@ -1,6 +1,6 @@
 import numpy as np 
 import math
-from data_processing import EXPECTED_FEATURES, NUM_COLORS, NUM_COLOR_FEATURES
+from data_processing import EXPECTED_FEATURES, NUM_COLORS
 
 class node:
     #data - the feature data array created in data_collection.py (length of 17)
@@ -94,7 +94,6 @@ class decision_tree:
     #Returns the feature in the data with the highest information gain, there will be the split
     def best_split(self, data):
         num_features = EXPECTED_FEATURES - 1  #ignoring the phish_val
-        num_color_features = NUM_COLORS * NUM_COLOR_FEATURES
         
         #Only need to calculate parent entropy once for each split 
         parent_entropy = self.entropy(data)
@@ -108,7 +107,7 @@ class decision_tree:
         best_feature_column = None
         best_split_value = None
 
-        for feature in range(num_color_features, num_features):
+        for feature in range(NUM_COLORS, num_features):
             if np.any(data[:, feature] == 1):
                     info_gain = self.information_gain(data, feature, 0, parent_entropy) * 7.0 #I want *good* brand splits to happen before color ones
                     if info_gain > best_info_gain:
@@ -117,7 +116,7 @@ class decision_tree:
                         best_split_value = 0
 
         if best_info_gain == 0.0: 
-            for feature in range(num_color_features):
+            for feature in range(NUM_COLORS):
                 feature_vals_padded = np.unique(data[:, feature])
                 #Ignore padded colors
                 feature_vals = feature_vals_padded[feature_vals_padded != 0.0] 
@@ -158,7 +157,7 @@ class decision_tree:
 
         balance = 1 - abs(left_child_entropy - right_child_entropy)
         
-        if feature_column >= NUM_COLOR_FEATURES * NUM_COLORS:
+        if feature_column >= NUM_COLORS:
             #If split creates a right child that is very "pure"
             if right_child_entropy < 0.1 or left_child_entropy < 0.1:
                 return gain * 2.5
@@ -229,7 +228,7 @@ class decision_tree:
             return current_node.phish_val 
         
         #If the data being split on it a padded value, go the route with the larger sample of data (only for colors)
-        if current_node.feature < (NUM_COLOR_FEATURES * NUM_COLORS) and features[current_node.feature] == 0.0:
+        if current_node.feature < (NUM_COLORS) and features[current_node.feature] == 0.0:
             if len(current_node.left_child.data) > len(current_node.right_child.data):
                 return self.predict_traverse(features, current_node.left_child)
             else:

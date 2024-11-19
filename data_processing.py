@@ -1,12 +1,11 @@
 import os
 import numpy as np
 import colorgram as cg
-from PIL import Image
 import pytesseract
 
 #For windows:
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-#For Linux (mint)
+#For Linux (for use in some testing I did)
 #pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
 
 #List of some of the more popular targeted websites to focus on
@@ -14,10 +13,8 @@ BRAND_NAMES = ['facebook', 'netflix', 'microsoft', 'tiktok', 'amazon', 'paypal',
 NUM_BRAND_FEATURES = len(BRAND_NAMES)
 #How many colors to extract from each image
 NUM_COLORS = 3
-#This was from when I was also tracking proportion for each color, but I feel like it wasnt improving metrics
-NUM_COLOR_FEATURES = 1
 #How many features should be present in each data structure
-EXPECTED_FEATURES = NUM_COLORS * NUM_COLOR_FEATURES + NUM_BRAND_FEATURES + 1 
+EXPECTED_FEATURES = NUM_COLORS + NUM_BRAND_FEATURES + 1 
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -32,7 +29,7 @@ def extract_colors(screenshot):
         hex_color_list.append(hex_val)
         
     #If there is less than NUM_COLORS in the screenshot, add dummy color
-    while len(hex_color_list) < (NUM_COLORS * NUM_COLOR_FEATURES):
+    while len(hex_color_list) < NUM_COLORS :
         hex_color_list.append(0.0)
 
     return hex_color_list
