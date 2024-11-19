@@ -1,9 +1,8 @@
 import numpy as np 
-import math
 from data_processing import EXPECTED_FEATURES, NUM_COLORS
 
 class node:
-    #data - the feature data array created in data_collection.py (length of 17)
+    #data - the feature data array created in data_collection.py (length of EXPECTED_FEATURES)
     #left_child/ right_child - binary tree children of current node
     #phish_val - the predicted classification, only useful for the leaf nodes
     #is_leaf - value is true if the node is a leaf node, false otherwise
@@ -25,36 +24,31 @@ class decision_tree:
         self.max_depth = max_depth
         self.min_data_split  = min_data_split
         self.root = node(depth=0)
-
-    #------------------------------------------------------------------------------------------------------#
+    
 
     #Starts the process of building the tree, converts data to column stack and calls expand_tree (recursive)
     def start_building(self, features):
         self.root.data = features
         self.expand_tree(self.root)
 
-    #------------------------------------------------------------------------------------------------------#
     
-    #Recursively builds the tree, passes in a node and checks if it will exceed max depth or 
-    #if it is going to be a leaf node. Also handles splitting
+    #Recursively builds the tree, passes in a node and checks if it will exceed max depth, if the data is  
+    #of the same classification, or if it is too small. Then it is going to be a leaf node.
     def expand_tree(self, current_node):
         #If the data is empty, mark it as empty and create a leaf node
         if len(current_node.data) == 0:
-            current_node.is_leaf = True;
-            current_node.phish_val = -1; #empty data
+            current_node.is_leaf = True
+            current_node.phish_val = -1
             return 
         
-        #If the data is 1D, force reshape it to be 2D (hack fix)
-        if len(current_node.data.shape) == 1:
-            current_node.data = current_node.data.reshape(1, EXPECTED_FEATURES)
-        
-        #Check to see if a leaf node condition has been reached
+        #Check to see if a leaf node condition (depth, min_samples, or same class) has been reached
         if current_node.depth >= self.max_depth or self.same_classification(current_node.data) or len(current_node.data) < self.min_data_split:
             current_node.is_leaf = True
             current_node.phish_val = np.round(np.mean(current_node.data[:, -1])) 
             print(f"Created a leaf: phish_val: {current_node.phish_val}, depth: {current_node.depth}, feature: {current_node.feature}")
             return
         
+        #Early leaf creation if there is a high or low phish ratio after a split 
         num_phish = np.sum(current_node.data[:,-1] == 0)
         phish_ratio = num_phish / len(current_node.data)
 
@@ -68,12 +62,10 @@ class decision_tree:
             current_node.phish_val = 0 
             return 
 
-        #Determine best_split and create child nodes
         best_feature_column, best_split_value = self.best_split(current_node.data)
         
-        #This checks for if the entropy returned as 0
         if(best_feature_column == None or best_split_value == None):
-            print("NO MORE SPLITS FOUND")
+            print("No more good splits found, creating a leaf...")
             current_node.is_leaf = True
             current_node.phish_val = np.round(np.mean(current_node.data[:, -1]))
             return
@@ -85,11 +77,9 @@ class decision_tree:
         current_node.left_child = node(left_data, depth=current_node.depth+1)
         current_node.right_child = node(right_data, depth=current_node.depth+1)
         
-        #Call expand_tree on the new child nodes
         self.expand_tree(current_node.left_child)
         self.expand_tree(current_node.right_child)
 
-    #------------------------------------------------------------------------------------------------------#
 
     #Returns the feature in the data with the highest information gain, there will be the split
     def best_split(self, data):
@@ -99,7 +89,7 @@ class decision_tree:
         parent_entropy = self.entropy(data)
         print(f"Parent entropy: {parent_entropy}")
 
-        #The data all has the same phish_val 
+        #If entropy is 0 that means the data is of the same classification, so no more splitting needed
         if(parent_entropy == 0):
             return None, None
 
@@ -121,7 +111,6 @@ class decision_tree:
                 #Ignore padded colors
                 feature_vals = feature_vals_padded[feature_vals_padded != 0.0] 
                 split_points = np.percentile(feature_vals, [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99])
-                #split_points = np.percentile(feature_vals, [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 99])
                 if len(split_points) > 1:
                     for split_val in split_points:
                         info_gain = self.information_gain(data, feature, split_val, parent_entropy)
@@ -135,8 +124,6 @@ class decision_tree:
         print(f"best feature: {best_feature_column}, best split_val: {best_split_value}, best info_gain: {best_info_gain}")
         return best_feature_column, best_split_value
         
-
-    #------------------------------------------------------------------------------------------------------#
 
     #Calculates information gain for each potential split 
     #<https://en.wikipedia.org/wiki/Information_gain_(decision_tree)>
@@ -154,7 +141,6 @@ class decision_tree:
         weighted_child_entropy = (left_weight * left_child_entropy + right_weight * right_child_entropy) 
     
         gain = parent_entropy - weighted_child_entropy
-
         balance = 1 - abs(left_child_entropy - right_child_entropy)
         
         if feature_column >= NUM_COLORS:
@@ -165,8 +151,7 @@ class decision_tree:
 
         return gain * (balance ** 2)
 
-    #------------------------------------------------------------------------------------------------------#
-
+    
     #Calculates the binary entropy using phish_val (phish_val is either 0 or 1) 
     #<https://en.wikipedia.org/wiki/Binary_entropy_function>
     def entropy(self, data):
@@ -180,9 +165,8 @@ class decision_tree:
         if p < 0.1 or p > 0.9:
             return 0
 
-        return -p * np.log2(p) - (1 - p) * np.log2(1 - p)
-        
-    #------------------------------------------------------------------------------------------------------#
+        return -p * np.log2(p) - (1 - p) * np.log2(1 - p)  
+    
         
     #Splits the data based on the feature and split value 
     def split_by_feature(self, data, feature_column, split_value):
@@ -198,15 +182,12 @@ class decision_tree:
         return np.array(left_data), np.array(right_data)
 
 
-    #------------------------------------------------------------------------------------------------------#
-
     #Returns true if all data at a node is in the same class/phish_val (pure)
     def same_classification(self, data):
         phish_vals = data[:, -1]
         unique_vals = np.unique(phish_vals)
         return len(unique_vals) == 1
 
-    #------------------------------------------------------------------------------------------------------#
         
     #Uses input to predict classification based on the created tree
     #Returns array of predictions based on data
@@ -217,8 +198,7 @@ class decision_tree:
             predictions.append(phish_prediction)
         return np.array(predictions)
 
-    #------------------------------------------------------------------------------------------------------#
-
+    
     #Recursive tree traversal function, used for classification of data (phish_val)
     def predict_traverse(self, features, current_node):
         if current_node.is_leaf:
