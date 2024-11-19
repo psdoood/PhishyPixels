@@ -1,6 +1,6 @@
 #                         <<<IMPORTANT>>>
-#Must run data_collection.py/ organize_screenshots.py first (unless 
-#screenshot brand folders are already filled, then you are good)
+#Must run data_collection.py/organize_screenshots.py first (unless 
+#screenshot brand folders are already filled, which they should be)
 #I seperated this process to make the decision tree testing/demo faster
 
 import os
@@ -8,8 +8,7 @@ import data_processing as dp
 import decision_tree as dt
 import numpy as np
 
-#Simply calculates the metrics that are being used to measure results of the 
-#test data, returns true positive rate and false positive rate
+#Calculates the true positive rate (higher better) and false positive rate (lower better)
 def calculate_metrics(predictions, phish_vals_test):
     num_actual_phish = np.sum(phish_vals_test == 0)
     num_actual_legit = np.sum(phish_vals_test == 1)
@@ -25,7 +24,6 @@ def calculate_metrics(predictions, phish_vals_test):
     return tpr, fpr
 
 
-#------------------------------------------------------------------------------------------------------#
 #Implementations of K-Fold cross validation, makes sure each sample (data/k) is used in both training and testing
 #at different decision tree creations
 def k_fold_cross_validation(k=9):
@@ -71,7 +69,6 @@ def k_fold_cross_validation(k=9):
             legit_fold = int(len(legit_brand_data) / k)
             phish_fold = int(len(phish_brand_data) / k)
 
-            #Find the K fold area for training
             legit_start_test = i * legit_fold
             legit_end_test = (i + 1) * legit_fold
             phish_start_test = i * phish_fold
@@ -94,12 +91,12 @@ def k_fold_cross_validation(k=9):
         np.random.shuffle(train)
         np.random.shuffle(test)
 
-        print(f"Building the decision tree with training data from fold: {k}")
+        print(f"Building the decision tree with training data from fold: {i + 1}")
         tree = dt.decision_tree()
         tree.start_building(train)
-        print(f"Finished building the decision tree for fold: {k}")
+        print(f"Finished building the decision tree for fold: {i + 1}")
 
-        print(f"Running test data for predictions for fold: {k}")
+        print(f"Running test data for predictions for fold: {i + 1}")
         feature_test = test[:, :-1]
         phish_vals_test = test[:, -1]
         predictions = tree.predict(feature_test)
@@ -122,7 +119,6 @@ def k_fold_cross_validation(k=9):
     print(f"True positive rate (higher is better): {np.mean(tpr_list)}")
     print(f"False positive rate (lower is better): {np.mean(fpr_list)}")
 
-    
 
 def main():
     k_fold_cross_validation()
