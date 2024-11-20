@@ -96,16 +96,18 @@ class decision_tree:
         best_info_gain = 0.0
         best_feature_column = None
         best_split_value = None
+        found_brand_split = False
 
         for feature in range(NUM_COLORS, num_features):
             if np.any(data[:, feature] == 1):
                     info_gain = self.information_gain(data, feature, 0, parent_entropy) * 7.0 #I want *good* brand splits to happen before color ones
                     if info_gain > best_info_gain:
+                        found_brand_split = True
                         best_info_gain = info_gain
                         best_feature_column = feature
                         best_split_value = 0
 
-        if best_info_gain == 0.0: 
+        if found_brand_split is False: 
             for feature in range(NUM_COLORS):
                 feature_vals_padded = np.unique(data[:, feature])
                 #Ignore padded colors
