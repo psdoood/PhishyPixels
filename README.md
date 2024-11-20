@@ -1,6 +1,6 @@
 # PhishyPixels 
 
-This is a machine learning project for website phish detection using only color analysis. It extracts the 3 most dominant colors from each website to try and determine if a website is legitimate or not (from a specific list of 10 targeted brands). It produces results of over 80% accuracy, but with an increased/improved data sample I beleive it could be over 90%.
+This is a machine learning project for website phish detection using only color analysis. It extracts the 3 most dominant colors from each website to try and determine if a website is legitimate or not (from a specific list of 10 targeted brands). It produces consistent results of over 80% accuracy, but with an increased/improved data sample I beleive it could consistently be over 90%.
 
 ## Data
 - List of non-legitimate URLS comes from [OpenPhish](https://openphish.com/). 
