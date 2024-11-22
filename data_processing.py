@@ -48,10 +48,8 @@ def create_data_structure(screenshots_paths, brand_index, is_phish):
         else:
             print(f"Path at {path} has wrong feature length, ignoring...")
     
-    if len(data) > 0:
-        data_array = np.array(data, dtype=float)
-        #Return the data in the correct array shape
-        return data_array.reshape(len(data), EXPECTED_FEATURES)
-    else:
-        #Return an empty array if data wasn't created
-        return np.array(data, dtype=float).reshape(0, EXPECTED_FEATURES)
+    
+    data_array = np.array(data, dtype=float)
+    
+    return data_array
+    
