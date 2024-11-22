@@ -19,6 +19,7 @@ This is a machine learning project for website phish detection using only color 
 
 ## Results
 ![results](https://github.com/user-attachments/assets/4e9fe24a-9937-4771-80c3-4f8683b06209)
+
 Results were measured using Accuracy, True Positive Rate, and False Positive Rate. Accuracy is how many of the test predictions were correct. TPR is how many of the test phish sites were correctly predicted out of all the test phish sites. FPR is how many test legit sites were predicted to be a phish out of all the legit test sites.
 
 ## Required Libraries
